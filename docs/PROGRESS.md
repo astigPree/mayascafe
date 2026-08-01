@@ -25,3 +25,4 @@
 - Left `config/settings_data.json`, all templates, and all existing section registrations unchanged.
 - Validation completed: settings and locale JSON parse successfully, setting IDs are unique, schema translation keys resolve, and `shopify theme check --no-color` completed with 40 files inspected and no offenses.
 - No Shopify theme development server was started.
+- Corrected the `cafe_review_count` range from 0-1000 to 0-100 so it remains within Shopify's 101-value range-setting limit; schema parsing and Theme Check pass after the correction.

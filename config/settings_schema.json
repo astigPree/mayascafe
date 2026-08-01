@@ -489,7 +489,7 @@
         "type": "range",
         "id": "cafe_review_count",
         "min": 0,
-        "max": 1000,
+        "max": 100,
         "step": 1,
         "label": "t:labels.cafe_review_count",
         "default": 5
