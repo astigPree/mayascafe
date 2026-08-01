@@ -26,3 +26,24 @@
 - Validation completed: settings and locale JSON parse successfully, setting IDs are unique, schema translation keys resolve, and `shopify theme check --no-color` completed with 40 files inspected and no offenses.
 - No Shopify theme development server was started.
 - Corrected the `cafe_review_count` range from 0-1000 to 0-100 so it remains within Shopify's 101-value range-setting limit; schema parsing and Theme Check pass after the correction.
+
+## Announcement, header, and hero completed
+
+- Replaced the empty announcement-bar placeholder with a configurable Cozy Noir announcement bar in the existing header group. It supports editable desktop/mobile messages, service text, optional social links, color overrides, sticky placement, and optional hide-on-scroll behavior.
+- Rebuilt the starter header as the Maya's Cafe navigation component. Desktop navigation uses Shopify Navigation; the mobile experience uses an accessible right-side dialog drawer with focus management, Escape and overlay closing, focus return, body-scroll locking, and a measured sticky-header offset.
+- Added a central `maya-icon` snippet. It reuses the existing coffee, location, clock, bag, heart, review, gallery, service, phone, Facebook, and Instagram SVGs, with five new currentColor-compatible glyphs only for the missing home, menu, close, email, and TikTok uses.
+- Added the configurable Maya's Cafe hero as the first homepage section without removing the existing starter content. It supports separate optimized desktop/mobile images, image fallback and placeholder behavior, overlay controls, editable split-color copy, button URLs with safe fallbacks, and up to four editable information blocks.
+- Added the global `cafe_email` and optional `cafe_tiktok_url` settings. Empty email and social values are hidden in the storefront.
+- Updated section and storefront translations, plus `header-group.json` and `templates/index.json`, while leaving `settings_data.json` unchanged.
+- Validation completed: section schemas, JSONC template configuration, section/global setting references, translation keys, range limits, icon references, and homepage/header-group integration were checked; `shopify theme check --no-color` passed with 42 files inspected and no offenses.
+- No Shopify theme development server was started. Bestsellers, About, Gallery, Reviews, Visit, and Footer sections remain untouched.
+
+## Fix phase
+
+- Increased the desktop and mobile drawer Order Now bag icon to 1.75rem (28px) and made its SVG wrapper explicit so the icon renders at the intended size.
+- Added a Theme Editor range setting for the Order Now icon size (16–48px, 2px steps, 28px default), applied to both desktop and mobile drawer buttons.
+- Fixed the hero divider by separating its line elements from the heart icon wrapper, preventing the icon from stretching across the divider.
+- Increased hero button icons to 2rem (32px) and set the Get Directions hover text to espresso for readable contrast on the light hover background.
+- Set the primary View Our Menu button label to inverse white, matching its white icon in normal and hover states.
+- `shopify theme check --no-color` passes with 42 files inspected and no offenses.
+- No Shopify theme development server was started.

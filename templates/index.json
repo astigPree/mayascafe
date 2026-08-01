@@ -9,12 +9,55 @@
  */
 {
   "sections": {
+    "maya_hero": {
+      "type": "maya-hero",
+      "blocks": {
+        "rating": {
+          "type": "information",
+          "settings": {
+            "data_source": "rating",
+            "icon": "star"
+          }
+        },
+        "hours": {
+          "type": "information",
+          "settings": {
+            "data_source": "hours",
+            "icon": "clock"
+          }
+        },
+        "address": {
+          "type": "information",
+          "settings": {
+            "data_source": "address",
+            "icon": "location"
+          }
+        },
+        "services": {
+          "type": "information",
+          "settings": {
+            "data_source": "custom",
+            "icon": "services",
+            "primary_text": "Dine-in, Takeout",
+            "secondary_text": "Delivery & Pickup"
+          }
+        }
+      },
+      "block_order": [
+        "rating",
+        "hours",
+        "address",
+        "services"
+      ],
+      "settings": {}
+    },
     "main": {
       "type": "hello-world",
       "settings": {}
     }
   },
   "order": [
+    "maya_hero",
     "main"
   ]
 }

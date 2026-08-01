@@ -1,0 +1,56 @@
+{% doc %}
+  Renders a decorative Maya's Cafe SVG icon from the shared asset library.
+
+  @param {string} name - Semantic icon name or navigation handle.
+
+  @example
+  {% render 'maya-icon', name: 'coffee' %}
+{% enddoc %}
+
+{% liquid
+  assign icon_name = name | default: 'heart' | handleize
+  assign icon_asset = 'heart.svg'
+
+  case icon_name
+    when 'announcement', 'coffee', 'cup'
+      assign icon_asset = 'coffee-cup.svg'
+    when 'location', 'directions', 'address'
+      assign icon_asset = 'location-pin.svg'
+    when 'bag', 'order', 'cart'
+      assign icon_asset = 'shopping-bag.svg'
+    when 'heart'
+      assign icon_asset = 'heart.svg'
+    when 'star', 'review', 'reviews', 'rating'
+      assign icon_asset = 'star-rating.svg'
+    when 'clock', 'hours'
+      assign icon_asset = 'clock.svg'
+    when 'facebook'
+      assign icon_asset = 'facebook.svg'
+    when 'instagram'
+      assign icon_asset = 'instagram.svg'
+    when 'tiktok'
+      assign icon_asset = 'maya-tiktok.svg'
+    when 'phone', 'call'
+      assign icon_asset = 'phone.svg'
+    when 'email'
+      assign icon_asset = 'maya-email.svg'
+    when 'gallery'
+      assign icon_asset = 'view-gallery-photo.svg'
+    when 'about'
+      assign icon_asset = 'feature-friendly-service.svg'
+    when 'home'
+      assign icon_asset = 'maya-home.svg'
+    when 'menu'
+      assign icon_asset = 'maya-menu-book.svg'
+    when 'services', 'service'
+      assign icon_asset = 'service-cup.svg'
+    when 'close'
+      assign icon_asset = 'maya-close.svg'
+    when 'hamburger'
+      assign icon_asset = 'menu.svg'
+  endcase
+%}
+
+<span class="maya-icon maya-icon--{{ icon_name }}" aria-hidden="true">
+  {{ icon_asset | inline_asset_content }}
+</span>

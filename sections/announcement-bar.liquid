@@ -1,0 +1,283 @@
+{% liquid
+  assign desktop_message = section.settings.desktop_text | default: settings.cafe_hours_summary
+  assign mobile_message = section.settings.mobile_text | default: desktop_message
+%}
+
+{% if section.settings.enable_announcement %}
+  <aside
+    class="maya-announcement full-width{% if section.settings.enable_sticky %} maya-announcement--sticky{% endif %}"
+    data-maya-announcement
+    {% if section.settings.hide_on_scroll %}
+      data-hide-on-scroll
+    {% endif %}
+    aria-label="{{ 'accessibility.announcement' | t }}"
+    style="--maya-announcement-background: {{ section.settings.background_color }}; --maya-announcement-text: {{ section.settings.text_color }}; --maya-announcement-accent: {{ section.settings.accent_color }};"
+  >
+    <div class="maya-announcement__inner page-width">
+      <div class="maya-announcement__message">
+        {% render 'maya-icon', name: section.settings.icon %}
+        <p>
+          <span class="maya-announcement__desktop-text">{{ desktop_message | escape }}</span>
+          <span class="maya-announcement__mobile-text">{{ mobile_message | escape }}</span>
+        </p>
+        {% if section.settings.show_separator and section.settings.service_text != blank %}
+          <span class="maya-announcement__separator" aria-hidden="true">&bull;</span>
+        {% endif %}
+        {% if section.settings.service_text != blank %}
+          <p class="maya-announcement__service">{{ section.settings.service_text | escape }}</p>
+        {% endif %}
+      </div>
+
+      {% if section.settings.show_social_icons %}
+        {% if settings.cafe_facebook_url != blank or settings.cafe_instagram_url != blank %}
+          <nav class="maya-announcement__social" aria-label="{{ 'accessibility.social_links' | t }}">
+            {% if section.settings.show_facebook and settings.cafe_facebook_url != blank %}
+              <a
+                href="{{ settings.cafe_facebook_url }}"
+                aria-label="{{ 'accessibility.visit_facebook' | t }}"
+                {% if section.settings.social_new_tab %}
+                  target="_blank" rel="noopener noreferrer"
+                {% endif %}
+              >
+                {% render 'maya-icon', name: 'facebook' %}
+              </a>
+            {% endif %}
+            {% if section.settings.show_instagram and settings.cafe_instagram_url != blank %}
+              <a
+                href="{{ settings.cafe_instagram_url }}"
+                aria-label="{{ 'accessibility.visit_instagram' | t }}"
+                {% if section.settings.social_new_tab %}
+                  target="_blank" rel="noopener noreferrer"
+                {% endif %}
+              >
+                {% render 'maya-icon', name: 'instagram' %}
+              </a>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% endif %}
+    </div>
+  </aside>
+{% endif %}
+
+{% stylesheet %}
+  .maya-announcement {
+    z-index: var(--z-header);
+    width: 100%;
+    background: var(--maya-announcement-background);
+    color: var(--maya-announcement-text);
+    transition: transform var(--transition-fast) var(--easing-standard);
+  }
+
+  .maya-announcement--sticky {
+    position: sticky;
+    top: 0;
+  }
+
+  .maya-announcement.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .maya-announcement__inner {
+    display: flex;
+    min-height: 3.25rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-block: 0.5rem;
+  }
+
+  .maya-announcement__message,
+  .maya-announcement__social {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .maya-announcement__message {
+    min-width: 0;
+    color: inherit;
+    font-size: clamp(0.875rem, 0.3vw + 0.8rem, 1rem);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+  }
+
+  .maya-announcement__message p {
+    color: inherit;
+  }
+
+  .maya-announcement__message .maya-icon {
+    flex: 0 0 auto;
+    width: 1.5rem;
+    color: var(--maya-announcement-accent);
+  }
+
+  .maya-announcement__message .maya-icon svg,
+  .maya-announcement__social .maya-icon svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .maya-announcement__separator {
+    color: var(--maya-announcement-accent);
+    font-size: 1.2em;
+  }
+
+  .maya-announcement__mobile-text {
+    display: none;
+  }
+
+  .maya-announcement__social {
+    flex: 0 0 auto;
+  }
+
+  .maya-announcement__social a {
+    display: grid;
+    width: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    place-items: center;
+    color: var(--maya-announcement-accent);
+    text-decoration: none;
+  }
+
+  .maya-announcement__social .maya-icon {
+    width: 1.25rem;
+  }
+
+  @media (max-width: 749px) {
+    .maya-announcement__inner {
+      min-height: 3rem;
+      justify-content: flex-start;
+    }
+
+    .maya-announcement__desktop-text,
+    .maya-announcement__service,
+    .maya-announcement__separator,
+    .maya-announcement__social {
+      display: none;
+    }
+
+    .maya-announcement__mobile-text {
+      display: inline;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.maya_announcement.name",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.maya_announcement.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_announcement",
+      "label": "t:sections.maya_announcement.enable",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "desktop_text",
+      "label": "t:sections.maya_announcement.desktop_text",
+      "default": "Open today 8:00 AM - 10:00 PM"
+    },
+    {
+      "type": "text",
+      "id": "mobile_text",
+      "label": "t:sections.maya_announcement.mobile_text",
+      "default": "Open today 8:00 AM - 10:00 PM"
+    },
+    {
+      "type": "text",
+      "id": "service_text",
+      "label": "t:sections.maya_announcement.service_text",
+      "default": "Dine-in, Takeout & Delivery available!"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_separator",
+      "label": "t:sections.maya_announcement.show_separator",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "icon",
+      "label": "t:sections.maya_announcement.icon",
+      "options": [
+        { "value": "coffee", "label": "t:sections.maya_announcement.icon_coffee" },
+        { "value": "clock", "label": "t:sections.maya_announcement.icon_clock" },
+        { "value": "heart", "label": "t:sections.maya_announcement.icon_heart" }
+      ],
+      "default": "coffee"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_announcement.social"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social_icons",
+      "label": "t:sections.maya_announcement.show_social_icons",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_facebook",
+      "label": "t:sections.maya_announcement.show_facebook",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_instagram",
+      "label": "t:sections.maya_announcement.show_instagram",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "social_new_tab",
+      "label": "t:sections.maya_announcement.social_new_tab",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_announcement.appearance"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:sections.maya_announcement.background_color",
+      "default": "#1D1916"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:sections.maya_announcement.text_color",
+      "default": "#FFF9F0"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.maya_announcement.accent_color",
+      "default": "#C5A265"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "t:sections.maya_announcement.enable_sticky",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_on_scroll",
+      "label": "t:sections.maya_announcement.hide_on_scroll",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

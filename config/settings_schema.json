@@ -391,6 +391,11 @@
       },
       {
         "type": "text",
+        "id": "cafe_email",
+        "label": "t:labels.cafe_email"
+      },
+      {
+        "type": "text",
         "id": "cafe_address",
         "label": "t:labels.cafe_address",
         "default": "Ibingay Street, Brgy. Ibingay"
@@ -508,6 +513,11 @@
         "type": "url",
         "id": "cafe_instagram_url",
         "label": "t:labels.cafe_instagram_url"
+      },
+      {
+        "type": "url",
+        "id": "cafe_tiktok_url",
+        "label": "t:labels.cafe_tiktok_url"
       }
     ]
   },

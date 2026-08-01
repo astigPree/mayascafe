@@ -1,0 +1,946 @@
+{% liquid
+  assign anchor_id = section.settings.anchor_id | default: 'home' | handleize
+  assign desktop_image = section.settings.desktop_image
+  assign mobile_image = section.settings.mobile_image | default: desktop_image
+  assign primary_url = section.settings.primary_button_url | default: settings.cafe_order_url
+  if primary_url == blank
+    assign primary_url = routes.all_products_collection_url
+  endif
+  assign secondary_url = section.settings.secondary_button_url | default: settings.cafe_directions_url
+%}
+
+<section
+  id="{{ anchor_id }}"
+  class="maya-hero full-width maya-hero--content-{{ section.settings.content_position }}{% if section.settings.enable_content_reveal %} maya-hero--reveal{% endif %}{% if section.settings.show_bottom_gradient %} maya-hero--bottom-gradient{% endif %}"
+  style="--maya-hero-desktop-height: {{ section.settings.desktop_min_height }}px; --maya-hero-mobile-height: {{ section.settings.mobile_min_height }}px; --maya-hero-image-position-desktop: {{ section.settings.desktop_image_position }}; --maya-hero-image-position-mobile: {{ section.settings.mobile_image_position }}; --maya-hero-overlay-color: {{ section.settings.overlay_color }}; --maya-hero-overlay-strength: {{ section.settings.overlay_strength }}%; --maya-hero-mobile-overlay-strength: {{ section.settings.overlay_strength | plus: 20 | at_most: 95 }}%; --maya-hero-overlay-direction: {{ section.settings.overlay_direction }}; --maya-hero-text-align-desktop: {{ section.settings.desktop_text_alignment }}; --maya-hero-text-align-mobile: {{ section.settings.mobile_text_alignment }}; --maya-hero-divider-width: {{ section.settings.divider_width }}px; --maya-hero-divider-color: {{ section.settings.divider_color }};"
+  data-section-id="{{ section.id }}"
+>
+  <div class="maya-hero__media" aria-hidden="{% if section.settings.desktop_image_alt == blank %}true{% else %}false{% endif %}">
+    {% if desktop_image != blank %}
+      <picture>
+        {% if section.settings.mobile_image != blank %}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ mobile_image | image_url: width: 480 }} 480w, {{ mobile_image | image_url: width: 750 }} 750w, {{ mobile_image | image_url: width: 1100 }} 1100w"
+            sizes="100vw"
+          >
+        {% endif %}
+        {{ desktop_image | image_url: width: 2400 | image_tag: widths: '750, 1100, 1500, 2000, 2400', sizes: '100vw', loading: 'eager', fetchpriority: 'high', alt: section.settings.desktop_image_alt }}
+      </picture>
+    {% else %}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'maya-hero__placeholder' }}
+    {% endif %}
+  </div>
+
+  <div class="maya-hero__inner page-width" style="--maya-hero-content-width: {{ section.settings.content_width }}px;">
+    <div class="maya-hero__content">
+      {% if section.settings.eyebrow != blank %}
+        <p class="maya-hero__eyebrow">
+          {% render 'maya-icon', name: 'announcement' %}
+          <span>{{ section.settings.eyebrow | escape }}</span>
+        </p>
+      {% endif %}
+
+      <h1 class="maya-hero__title">
+        {% if section.settings.heading != blank %}
+          <span>{{ section.settings.heading | escape }}</span>
+        {% endif %}
+        {% if section.settings.highlighted_heading != blank %}
+          <span class="maya-hero__title-highlight">{{ section.settings.highlighted_heading | escape }}</span>
+        {% endif %}
+      </h1>
+
+      {% if section.settings.description != blank %}
+        <p class="maya-hero__description">{{ section.settings.description | escape | newline_to_br }}</p>
+      {% endif %}
+
+      {% if section.settings.show_divider %}
+        <div class="maya-hero__divider" aria-hidden="true">
+          <span class="maya-hero__divider-line"></span>
+          {% render 'maya-icon', name: section.settings.divider_icon %}
+          <span class="maya-hero__divider-line"></span>
+        </div>
+      {% endif %}
+
+      <div class="maya-hero__buttons">
+        {% if section.settings.show_primary_button %}
+          <a
+            class="button button--gold maya-hero__button maya-hero__button--primary"
+            href="{{ primary_url }}"
+            {% if section.settings.primary_button_new_tab %}
+              target="_blank" rel="noopener noreferrer"
+            {% endif %}
+          >
+            {% unless section.settings.primary_button_icon == 'none' %}
+              {% render 'maya-icon', name: section.settings.primary_button_icon %}
+            {% endunless %}
+            <span>{{ section.settings.primary_button_label | escape }}</span>
+          </a>
+        {% endif %}
+
+        {% if section.settings.show_secondary_button and secondary_url != blank %}
+          <a
+            class="button button--outline maya-hero__button maya-hero__button--secondary"
+            href="{{ secondary_url }}"
+            {% if section.settings.secondary_button_new_tab %}
+              target="_blank" rel="noopener noreferrer"
+            {% endif %}
+          >
+            {% unless section.settings.secondary_button_icon == 'none' %}
+              {% render 'maya-icon', name: section.settings.secondary_button_icon %}
+            {% endunless %}
+            <span>{{ section.settings.secondary_button_label | escape }}</span>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if section.blocks.size > 0 %}
+      <div class="maya-hero__information" aria-label="{{ 'accessibility.cafe_information' | t }}">
+        {% for block in section.blocks limit: 4 %}
+          {% liquid
+            assign info_primary = block.settings.primary_text
+            assign info_secondary = block.settings.secondary_text
+            assign info_url = block.settings.url
+
+            case block.settings.data_source
+              when 'rating'
+                assign info_primary = settings.cafe_rating
+                capture info_secondary
+                  echo settings.cafe_review_count
+                  echo 'hero.reviews' | t
+                endcapture
+              when 'hours'
+                assign info_primary = settings.cafe_opening_status_text
+                assign info_secondary = settings.cafe_hours_summary
+              when 'address'
+                assign info_primary = settings.cafe_address
+                assign info_secondary = settings.cafe_city
+                assign info_url = info_url | default: settings.cafe_directions_url
+            endcase
+          %}
+
+          {% capture info_content %}
+            <span class="maya-hero__information-icon">
+              {% render 'maya-icon', name: block.settings.icon %}
+            </span>
+            <span class="maya-hero__information-copy">
+              {% if block.settings.info_eyebrow != blank %}
+                <small>{{ block.settings.info_eyebrow | escape }}</small>
+              {% endif %}
+              {% if info_primary != blank %}
+                <strong>{{ info_primary | escape }}</strong>
+              {% endif %}
+              {% if info_secondary != blank %}
+                <span>{{ info_secondary | strip | escape }}</span>
+              {% endif %}
+            </span>
+          {% endcapture %}
+
+          <div
+            class="maya-hero__information-item{% if block.settings.hide_mobile %} maya-hero__information-item--hide-mobile{% endif %}{% if block.settings.hide_desktop %} maya-hero__information-item--hide-desktop{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {% if info_url != blank %}
+              <a href="{{ info_url }}"{% if block.settings.accessible_label != blank %} aria-label="{{ block.settings.accessible_label | escape }}"{% endif %}>
+                {{ info_content }}
+              </a>
+            {% else %}
+              <div>
+                {{ info_content }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% stylesheet %}
+  .maya-hero {
+    position: relative;
+    isolation: isolate;
+    min-height: var(--maya-hero-desktop-height);
+    overflow: clip;
+    scroll-margin-top: var(--maya-anchor-offset, 0px);
+    background: var(--color-espresso);
+    color: var(--color-text-inverse);
+  }
+
+  .maya-hero__media,
+  .maya-hero::before,
+  .maya-hero::after {
+    position: absolute;
+    inset: 0;
+  }
+
+  .maya-hero__media {
+    z-index: 0;
+    background: var(--color-espresso);
+  }
+
+  .maya-hero__media picture,
+  .maya-hero__media img,
+  .maya-hero__placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .maya-hero__media img {
+    object-fit: cover;
+    object-position: var(--maya-hero-image-position-desktop);
+  }
+
+  .maya-hero__placeholder {
+    fill: var(--color-coffee);
+  }
+
+  .maya-hero::before,
+  .maya-hero::after {
+    z-index: 1;
+    content: '';
+    pointer-events: none;
+  }
+
+  .maya-hero::before {
+    background: linear-gradient(
+      var(--maya-hero-overlay-direction),
+      color-mix(in srgb, var(--maya-hero-overlay-color) var(--maya-hero-overlay-strength), transparent) 0%,
+      transparent 78%
+    );
+  }
+
+  .maya-hero--bottom-gradient::after {
+    background: linear-gradient(to top, rgb(29 25 22 / 68%) 0%, transparent 38%);
+  }
+
+  .maya-hero__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    min-height: inherit;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-8);
+    padding-block: clamp(4rem, 8vw, 7.5rem) var(--space-6);
+  }
+
+  .maya-hero__content {
+    width: min(100%, var(--maya-hero-content-width));
+    text-align: var(--maya-hero-text-align-desktop);
+  }
+
+  .maya-hero--content-center .maya-hero__content {
+    margin-inline: auto;
+  }
+
+  .maya-hero--content-end .maya-hero__content {
+    margin-inline-start: auto;
+  }
+
+  .maya-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--color-gold);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-label);
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  .maya-hero__eyebrow .maya-icon {
+    width: 1.5rem;
+  }
+
+  .maya-hero__eyebrow .maya-icon svg,
+  .maya-hero__divider .maya-icon svg,
+  .maya-hero__information-icon .maya-icon svg,
+  .maya-hero__button .maya-icon svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .maya-hero__title {
+    display: grid;
+    gap: 0.1em;
+    max-width: 47ch;
+    margin-top: var(--space-3);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-display);
+  }
+
+  .maya-hero__title-highlight {
+    color: var(--color-gold);
+  }
+
+  .maya-hero__description {
+    max-width: 47ch;
+    margin-top: var(--space-3);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-body-large);
+    line-height: 1.65;
+  }
+
+  .maya-hero__divider {
+    display: flex;
+    width: min(100%, var(--maya-hero-divider-width));
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+    color: var(--maya-hero-divider-color);
+  }
+
+  .maya-hero__divider-line {
+    height: 1px;
+    flex: 1;
+    background: currentcolor;
+  }
+
+  .maya-hero__divider .maya-icon {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 1.75rem;
+    line-height: 0;
+  }
+
+  .maya-hero__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+
+  .maya-hero__button {
+    min-height: max(3.5rem, var(--button-height-large));
+    padding-inline: clamp(1.25rem, 2vw, 2rem);
+  }
+
+  .maya-hero__button .maya-icon {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 2rem;
+    line-height: 0;
+  }
+
+  .maya-hero__button--primary .maya-icon {
+    filter: brightness(0) invert(1);
+  }
+
+  .maya-hero__button--primary.button--gold,
+  .maya-hero__button--primary.button--gold:not(:disabled):not([aria-disabled='true']):hover {
+    color: var(--color-text-inverse);
+  }
+
+  .maya-hero__button--secondary {
+    border-color: var(--color-text-inverse);
+    background: rgb(29 25 22 / 22%);
+    color: var(--color-text-inverse);
+  }
+
+  .maya-hero__button--secondary.button--outline:not(:disabled):not([aria-disabled='true']):hover {
+    color: var(--color-espresso);
+  }
+
+  .maya-hero__information {
+    display: grid;
+    width: min(100%, 60rem);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .maya-hero__information-item {
+    min-width: 0;
+    padding-inline: var(--space-3);
+    border-inline-start: 1px solid color-mix(in srgb, var(--color-gold) 65%, transparent);
+  }
+
+  .maya-hero__information-item:first-child {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+
+  .maya-hero__information-item > :where(a, div) {
+    display: flex;
+    min-height: 3.75rem;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-inverse);
+    text-decoration: none;
+  }
+
+  .maya-hero__information-icon {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    color: var(--color-gold);
+  }
+
+  .maya-hero__information-copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.1rem;
+  }
+
+  .maya-hero__information-copy small {
+    color: var(--color-gold);
+    font-size: var(--font-size-label);
+  }
+
+  .maya-hero__information-copy strong {
+    color: var(--color-text-inverse);
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .maya-hero__information-copy > span {
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-small);
+    line-height: 1.4;
+  }
+
+  .maya-hero--reveal .maya-hero__content,
+  .maya-hero--reveal .maya-hero__information {
+    animation: maya-hero-reveal var(--transition-slow) var(--easing-emphasized) both;
+  }
+
+  .maya-hero--reveal .maya-hero__information {
+    animation-delay: 90ms;
+  }
+
+  @keyframes maya-hero-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .maya-hero__information {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
+    }
+
+    .maya-hero__information-item {
+      padding: 0;
+      border: 0;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .maya-hero {
+      min-height: var(--maya-hero-mobile-height);
+    }
+
+    .maya-hero__media img {
+      object-position: var(--maya-hero-image-position-mobile);
+    }
+
+    .maya-hero::before {
+      background:
+        linear-gradient(
+          to bottom,
+          color-mix(in srgb, var(--maya-hero-overlay-color) var(--maya-hero-mobile-overlay-strength), transparent) 0%,
+          color-mix(in srgb, var(--maya-hero-overlay-color) 52%, transparent) 72%,
+          rgb(29 25 22 / 72%) 100%
+        ),
+        linear-gradient(var(--maya-hero-overlay-direction), color-mix(in srgb, var(--maya-hero-overlay-color) var(--maya-hero-overlay-strength), transparent), transparent 78%);
+    }
+
+    .maya-hero__inner {
+      gap: var(--space-5);
+      padding-block: var(--space-8) var(--space-4);
+    }
+
+    .maya-hero__content {
+      text-align: var(--maya-hero-text-align-mobile);
+    }
+
+    .maya-hero__title {
+      max-width: 32ch;
+      font-size: clamp(3rem, 11.5vw, 3.75rem);
+    }
+
+    .maya-hero__description {
+      max-width: 32ch;
+    }
+
+    .maya-hero__divider {
+      width: 100%;
+    }
+
+    .maya-hero__buttons {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .maya-hero__button {
+      width: 100%;
+    }
+
+    .maya-hero__information {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
+      width: 100%;
+    }
+
+    .maya-hero__information-item {
+      padding: 0;
+      border: 1px solid color-mix(in srgb, var(--color-gold) 38%, transparent);
+      border-radius: var(--radius-card);
+      background: rgb(29 25 22 / 62%);
+    }
+
+    .maya-hero__information-item > :where(a, div) {
+      min-height: 8.75rem;
+      align-items: flex-start;
+      padding: var(--space-2);
+    }
+
+    .maya-hero__information-icon {
+      width: 2.25rem;
+      min-width: 2.25rem;
+    }
+
+    .maya-hero__information-copy strong {
+      font-size: 0.9375rem;
+    }
+
+    .maya-hero__information-copy > span {
+      font-size: 0.875rem;
+    }
+
+    .maya-hero__information-item--hide-mobile {
+      display: none;
+    }
+  }
+
+  @media (min-width: 750px) {
+    .maya-hero__information-item--hide-desktop {
+      display: none;
+    }
+  }
+
+  @media (max-width: 419px) {
+    .maya-hero__information {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .maya-hero--reveal .maya-hero__content,
+    .maya-hero--reveal .maya-hero__information {
+      animation: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.maya_hero.name",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.content"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "t:sections.maya_hero.anchor_id",
+      "default": "home"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:sections.maya_hero.eyebrow",
+      "default": "Welcome to Maya's Cafe"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.maya_hero.heading",
+      "default": "Your cozy"
+    },
+    {
+      "type": "text",
+      "id": "highlighted_heading",
+      "label": "t:sections.maya_hero.highlighted_heading",
+      "default": "corner in Masbate."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "t:sections.maya_hero.description",
+      "default": "Affordable meals, refreshing drinks, and a relaxing space for coffee, conversations, and quiet moments."
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.images"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_image",
+      "label": "t:sections.maya_hero.desktop_image"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "t:sections.maya_hero.mobile_image"
+    },
+    {
+      "type": "text",
+      "id": "desktop_image_alt",
+      "label": "t:sections.maya_hero.desktop_image_alt"
+    },
+    {
+      "type": "select",
+      "id": "desktop_image_position",
+      "label": "t:sections.maya_hero.desktop_image_position",
+      "options": [
+        { "value": "left top", "label": "t:sections.maya_hero.left_top" },
+        { "value": "left center", "label": "t:sections.maya_hero.left_center" },
+        { "value": "left bottom", "label": "t:sections.maya_hero.left_bottom" },
+        { "value": "center top", "label": "t:sections.maya_hero.center_top" },
+        { "value": "center center", "label": "t:sections.maya_hero.center_center" },
+        { "value": "center bottom", "label": "t:sections.maya_hero.center_bottom" },
+        { "value": "right top", "label": "t:sections.maya_hero.right_top" },
+        { "value": "right center", "label": "t:sections.maya_hero.right_center" },
+        { "value": "right bottom", "label": "t:sections.maya_hero.right_bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_position",
+      "label": "t:sections.maya_hero.mobile_image_position",
+      "options": [
+        { "value": "left top", "label": "t:sections.maya_hero.left_top" },
+        { "value": "left center", "label": "t:sections.maya_hero.left_center" },
+        { "value": "left bottom", "label": "t:sections.maya_hero.left_bottom" },
+        { "value": "center top", "label": "t:sections.maya_hero.center_top" },
+        { "value": "center center", "label": "t:sections.maya_hero.center_center" },
+        { "value": "center bottom", "label": "t:sections.maya_hero.center_bottom" },
+        { "value": "right top", "label": "t:sections.maya_hero.right_top" },
+        { "value": "right center", "label": "t:sections.maya_hero.right_center" },
+        { "value": "right bottom", "label": "t:sections.maya_hero.right_bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_min_height",
+      "min": 640,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.maya_hero.desktop_min_height",
+      "default": 780
+    },
+    {
+      "type": "range",
+      "id": "mobile_min_height",
+      "min": 560,
+      "max": 900,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.maya_hero.mobile_min_height",
+      "default": 680
+    },
+    {
+      "type": "select",
+      "id": "content_position",
+      "label": "t:sections.maya_hero.content_position",
+      "options": [
+        { "value": "start", "label": "t:sections.maya_hero.position_start" },
+        { "value": "center", "label": "t:sections.maya_hero.position_center" },
+        { "value": "end", "label": "t:sections.maya_hero.position_end" }
+      ],
+      "default": "start"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 360,
+      "max": 760,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.maya_hero.content_width",
+      "default": 620
+    },
+    {
+      "type": "select",
+      "id": "desktop_text_alignment",
+      "label": "t:sections.maya_hero.desktop_text_alignment",
+      "options": [
+        { "value": "left", "label": "t:sections.maya_hero.align_left" },
+        { "value": "center", "label": "t:sections.maya_hero.align_center" },
+        { "value": "right", "label": "t:sections.maya_hero.align_right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_alignment",
+      "label": "t:sections.maya_hero.mobile_text_alignment",
+      "options": [
+        { "value": "left", "label": "t:sections.maya_hero.align_left" },
+        { "value": "center", "label": "t:sections.maya_hero.align_center" },
+        { "value": "right", "label": "t:sections.maya_hero.align_right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.overlay"
+    },
+    {
+      "type": "range",
+      "id": "overlay_strength",
+      "min": 30,
+      "max": 90,
+      "step": 2,
+      "unit": "%",
+      "label": "t:sections.maya_hero.overlay_strength",
+      "default": 64
+    },
+    {
+      "type": "select",
+      "id": "overlay_direction",
+      "label": "t:sections.maya_hero.overlay_direction",
+      "options": [
+        { "value": "to right", "label": "t:sections.maya_hero.direction_right" },
+        { "value": "to left", "label": "t:sections.maya_hero.direction_left" },
+        { "value": "to bottom", "label": "t:sections.maya_hero.direction_bottom" }
+      ],
+      "default": "to right"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "t:sections.maya_hero.overlay_color",
+      "default": "#1D1916"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_gradient",
+      "label": "t:sections.maya_hero.show_bottom_gradient",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_content_reveal",
+      "label": "t:sections.maya_hero.enable_content_reveal",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "t:sections.maya_hero.show_divider",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "divider_icon",
+      "label": "t:sections.maya_hero.divider_icon",
+      "options": [
+        { "value": "heart", "label": "t:sections.maya_hero.icon_heart" },
+        { "value": "coffee", "label": "t:sections.maya_hero.icon_coffee" }
+      ],
+      "default": "heart"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "min": 160,
+      "max": 520,
+      "step": 10,
+      "unit": "px",
+      "label": "t:sections.maya_hero.divider_width",
+      "default": 420
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "t:sections.maya_hero.divider_color",
+      "default": "#C5A265"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.primary_button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_primary_button",
+      "label": "t:sections.maya_hero.show_primary_button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "t:sections.maya_hero.primary_button_label",
+      "default": "View Our Menu"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_url",
+      "label": "t:sections.maya_hero.primary_button_url"
+    },
+    {
+      "type": "select",
+      "id": "primary_button_icon",
+      "label": "t:sections.maya_hero.primary_button_icon",
+      "options": [
+        { "value": "coffee", "label": "t:sections.maya_hero.icon_coffee" },
+        { "value": "bag", "label": "t:sections.maya_hero.icon_bag" },
+        { "value": "none", "label": "t:sections.maya_hero.icon_none" }
+      ],
+      "default": "coffee"
+    },
+    {
+      "type": "checkbox",
+      "id": "primary_button_new_tab",
+      "label": "t:sections.maya_hero.button_new_tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_hero.secondary_button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_button",
+      "label": "t:sections.maya_hero.show_secondary_button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "t:sections.maya_hero.secondary_button_label",
+      "default": "Get Directions"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_url",
+      "label": "t:sections.maya_hero.secondary_button_url"
+    },
+    {
+      "type": "select",
+      "id": "secondary_button_icon",
+      "label": "t:sections.maya_hero.secondary_button_icon",
+      "options": [
+        { "value": "location", "label": "t:sections.maya_hero.icon_location" },
+        { "value": "none", "label": "t:sections.maya_hero.icon_none" }
+      ],
+      "default": "location"
+    },
+    {
+      "type": "checkbox",
+      "id": "secondary_button_new_tab",
+      "label": "t:sections.maya_hero.button_new_tab",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "information",
+      "name": "t:sections.maya_hero.information_block",
+      "settings": [
+        {
+          "type": "select",
+          "id": "data_source",
+          "label": "t:sections.maya_hero.data_source",
+          "options": [
+            { "value": "custom", "label": "t:sections.maya_hero.data_custom" },
+            { "value": "rating", "label": "t:sections.maya_hero.data_rating" },
+            { "value": "hours", "label": "t:sections.maya_hero.data_hours" },
+            { "value": "address", "label": "t:sections.maya_hero.data_address" }
+          ],
+          "default": "custom"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "t:sections.maya_hero.block_icon",
+          "options": [
+            { "value": "star", "label": "t:sections.maya_hero.icon_star" },
+            { "value": "clock", "label": "t:sections.maya_hero.icon_clock" },
+            { "value": "location", "label": "t:sections.maya_hero.icon_location" },
+            { "value": "services", "label": "t:sections.maya_hero.icon_services" },
+            { "value": "coffee", "label": "t:sections.maya_hero.icon_coffee" }
+          ],
+          "default": "coffee"
+        },
+        {
+          "type": "text",
+          "id": "info_eyebrow",
+          "label": "t:sections.maya_hero.block_eyebrow"
+        },
+        {
+          "type": "text",
+          "id": "primary_text",
+          "label": "t:sections.maya_hero.primary_text"
+        },
+        {
+          "type": "text",
+          "id": "secondary_text",
+          "label": "t:sections.maya_hero.secondary_text"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "t:sections.maya_hero.block_url"
+        },
+        {
+          "type": "text",
+          "id": "accessible_label",
+          "label": "t:sections.maya_hero.accessible_label"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "t:sections.maya_hero.hide_mobile",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "t:sections.maya_hero.hide_desktop",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.maya_hero.name",
+      "blocks": [
+        { "type": "information", "settings": { "data_source": "rating", "icon": "star" } },
+        { "type": "information", "settings": { "data_source": "hours", "icon": "clock" } },
+        { "type": "information", "settings": { "data_source": "address", "icon": "location" } },
+        { "type": "information", "settings": { "data_source": "custom", "icon": "services", "primary_text": "Dine-in, Takeout", "secondary_text": "Delivery & Pickup" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

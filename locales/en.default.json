@@ -1,6 +1,19 @@
 {
   "accessibility": {
-    "skip_to_content": "Skip to content"
+    "announcement": "Cafe announcements",
+    "cafe_information": "Cafe information",
+    "call_us": "Call us",
+    "close_navigation": "Close navigation",
+    "email_us": "Email us",
+    "follow_us": "Follow us",
+    "mobile_navigation": "Mobile navigation",
+    "open_navigation": "Open navigation",
+    "primary_navigation": "Primary navigation",
+    "skip_to_content": "Skip to content",
+    "social_links": "Social links",
+    "visit_facebook": "Visit Maya's Cafe on Facebook",
+    "visit_instagram": "Visit Maya's Cafe on Instagram",
+    "visit_tiktok": "Visit Maya's Cafe on TikTok"
   },
   "404": {
     "title": "404",
@@ -39,6 +52,9 @@
     "expired": "This gift card has expired",
     "expires_on": "Expires on {{ expires_on }}",
     "use_at_checkout": "Use this gift card at checkout"
+  },
+  "hero": {
+    "reviews": "reviews"
   },
   "password": {
     "title": "This shop is private",

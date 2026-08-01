@@ -1,76 +1,930 @@
-<header>
-  <h2 class="header__title">
-    {{ shop.name | link_to: routes.root_url }}
-  </h2>
+{% liquid
+  assign logo_image = section.settings.logo | default: settings.logo_light
+  assign drawer_logo = settings.logo_gold | default: settings.logo_dark | default: logo_image
+  assign order_url = section.settings.order_url | default: settings.cafe_order_url
+  if order_url == blank
+    assign order_url = routes.all_products_collection_url
+  endif
+  assign phone_number = settings.cafe_phone
+  assign phone_url = phone_number | remove: ' ' | remove: '-' | remove: '(' | remove: ')'
+  assign show_drawer_social = false
+  if section.settings.show_drawer_social
+    if settings.cafe_facebook_url != blank
+      assign show_drawer_social = true
+    elsif settings.cafe_instagram_url != blank
+      assign show_drawer_social = true
+    elsif settings.cafe_tiktok_url != blank
+      assign show_drawer_social = true
+    endif
+  endif
+  assign show_contact_details = false
+  if section.settings.show_contact_details
+    if phone_number != blank or settings.cafe_email != blank
+      assign show_contact_details = true
+    endif
+  endif
+%}
 
-  <div class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+<maya-header
+  class="maya-header full-width{% if section.settings.enable_sticky %} maya-header--sticky{% endif %}{% if section.settings.show_scroll_shadow %} maya-header--scroll-shadow{% endif %}{% unless section.settings.show_active_link_underline %} maya-header--no-active-underline{% endunless %}{% unless section.settings.show_drawer_dividers %} maya-header--no-drawer-dividers{% endunless %}"
+  data-section-id="{{ section.id }}"
+  style="--maya-header-background: {{ section.settings.background_color }}; --maya-header-text: {{ section.settings.text_color }}; --maya-header-accent: {{ section.settings.accent_color }}; --maya-drawer-background: {{ section.settings.drawer_background_color }}; --maya-drawer-text: {{ section.settings.drawer_text_color }}; --maya-drawer-accent: {{ section.settings.drawer_accent_color }}; --maya-header-height: {{ section.settings.header_height }}px; --maya-logo-width-desktop: {{ section.settings.logo_width_desktop }}px; --maya-logo-width-mobile: {{ section.settings.logo_width_mobile }}px; --maya-drawer-max-width: {{ section.settings.drawer_width }}px; --maya-order-icon-size: {{ section.settings.order_icon_size | default: 28 }}px;"
+>
+  <header class="maya-header__bar" data-maya-header-bar>
+    <div class="maya-header__inner page-width">
+      <a class="maya-header__logo" href="{{ routes.root_url }}" aria-label="{{ settings.cafe_name | default: shop.name | escape }}">
+        {% if logo_image != blank %}
+          {{ logo_image | image_url: width: 480 | image_tag: widths: '145, 180, 240, 360, 480', sizes: '(max-width: 749px) var(--maya-logo-width-mobile), var(--maya-logo-width-desktop)', loading: 'eager', fetchpriority: 'high', alt: settings.cafe_name }}
+        {% else %}
+          <span>{{ settings.cafe_name | default: shop.name }}</span>
+        {% endif %}
+      </a>
 
-  <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ section.settings.customer_account_menu }}">
-        {{ 'icon-account.svg' | inline_asset_content }}
-      </shopify-account>
-    {% endif %}
+      <nav class="maya-header__navigation" aria-label="{{ 'accessibility.primary_navigation' | t }}">
+        <ul>
+          {% for link in section.settings.menu.links %}
+            <li>
+              <a
+                href="{{ link.url }}"
+                {% if link.active %}
+                  class="is-active" aria-current="page"
+                {% endif %}
+              >
+                {{ link.title | escape }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
+      <div class="maya-header__actions">
+        {% if section.settings.show_order_button %}
+          <a
+            class="button button--primary maya-header__order"
+            href="{{ order_url }}"
+            {% if section.settings.order_new_tab %}
+              target="_blank" rel="noopener noreferrer"
+            {% endif %}
+          >
+            <span>{{ section.settings.order_label | escape }}</span>
+            {% unless section.settings.order_icon == 'none' %}
+              {% render 'maya-icon', name: section.settings.order_icon %}
+            {% endunless %}
+          </a>
+        {% endif %}
+
+        <button
+          class="maya-header__menu-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="maya-drawer-{{ section.id }}"
+          aria-label="{{ 'accessibility.open_navigation' | t }}"
+          data-maya-menu-button
+        >
+          {% render 'maya-icon', name: 'hamburger' %}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <dialog
+    id="maya-drawer-{{ section.id }}"
+    class="maya-mobile-drawer"
+    aria-label="{{ 'accessibility.primary_navigation' | t }}"
+    aria-modal="true"
+    data-maya-drawer
+  >
+    <div class="maya-mobile-drawer__panel">
+      <div class="maya-mobile-drawer__top">
+        {% if section.settings.show_drawer_logo %}
+          <div class="maya-mobile-drawer__brand">
+            {% if settings.logo_mark != blank %}
+              {{ settings.logo_mark | image_url: width: 120 | image_tag: widths: '80, 120', sizes: '3.25rem', loading: 'lazy', alt: '' }}
+            {% else %}
+              {% render 'maya-icon', name: 'coffee' %}
+            {% endif %}
+            {% if drawer_logo != blank %}
+              {{ drawer_logo | image_url: width: 360 | image_tag: widths: '180, 240, 360', sizes: '13rem', loading: 'lazy', alt: '' }}
+            {% else %}
+              <span>{{ settings.cafe_name | default: shop.name }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <button class="maya-mobile-drawer__close" type="button" data-maya-close-button>
+          <span class="visually-hidden">{{ 'accessibility.close_navigation' | t }}</span>
+          {% render 'maya-icon', name: 'close' %}
+        </button>
+      </div>
+
+      {% if section.settings.show_drawer_dividers %}
+        <div class="maya-mobile-drawer__divider" aria-hidden="true">
+          <span></span>
+          {% render 'maya-icon', name: 'heart' %}
+          <span></span>
+        </div>
       {% endif %}
 
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
-  </div>
-</header>
+      <nav class="maya-mobile-drawer__navigation" aria-label="{{ 'accessibility.mobile_navigation' | t }}">
+        <ul>
+          {% for link in section.settings.menu.links %}
+            {% assign icon_name = link.title | handleize %}
+            <li>
+              <a href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>
+                {% render 'maya-icon', name: icon_name %}
+                <span>{{ link.title | escape }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+
+      {% if section.settings.show_order_button %}
+        <a
+          class="button button--gold maya-mobile-drawer__order"
+          href="{{ order_url }}"
+          {% if section.settings.order_new_tab %}
+            target="_blank" rel="noopener noreferrer"
+          {% endif %}
+        >
+          {% unless section.settings.order_icon == 'none' %}
+            {% render 'maya-icon', name: section.settings.order_icon %}
+          {% endunless %}
+          <span>{{ section.settings.order_label | escape }}</span>
+        </a>
+      {% endif %}
+
+      {% if show_drawer_social %}
+        <div class="maya-mobile-drawer__social" aria-label="{{ 'accessibility.social_links' | t }}">
+          <p>{{ 'accessibility.follow_us' | t }}</p>
+          <div>
+            {% if settings.cafe_facebook_url != blank %}
+              <a href="{{ settings.cafe_facebook_url }}" aria-label="{{ 'accessibility.visit_facebook' | t }}" target="_blank" rel="noopener noreferrer">
+                {% render 'maya-icon', name: 'facebook' %}
+              </a>
+            {% endif %}
+            {% if settings.cafe_instagram_url != blank %}
+              <a href="{{ settings.cafe_instagram_url }}" aria-label="{{ 'accessibility.visit_instagram' | t }}" target="_blank" rel="noopener noreferrer">
+                {% render 'maya-icon', name: 'instagram' %}
+              </a>
+            {% endif %}
+            {% if settings.cafe_tiktok_url != blank %}
+              <a href="{{ settings.cafe_tiktok_url }}" aria-label="{{ 'accessibility.visit_tiktok' | t }}" target="_blank" rel="noopener noreferrer">
+                {% render 'maya-icon', name: 'tiktok' %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if show_contact_details %}
+        <div class="maya-mobile-drawer__contact">
+          {% if phone_number != blank %}
+            <a href="tel:{{ phone_url }}">
+              {% render 'maya-icon', name: 'phone' %}
+              <span><small>{{ 'accessibility.call_us' | t }}</small>{{ phone_number | escape }}</span>
+            </a>
+          {% endif %}
+          {% if settings.cafe_email != blank %}
+            <a href="mailto:{{ settings.cafe_email | escape }}">
+              {% render 'maya-icon', name: 'email' %}
+              <span><small>{{ 'accessibility.email_us' | t }}</small>{{ settings.cafe_email | escape }}</span>
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </dialog>
+</maya-header>
 
 {% stylesheet %}
-  header {
-    height: 5rem;
+  .maya-header {
+    z-index: var(--z-header);
+    width: 100%;
+  }
+
+  .maya-header--sticky {
+    position: sticky;
+    top: var(--maya-header-offset, 0px);
+  }
+
+  .maya-header__bar {
+    min-height: var(--maya-header-height);
+    border-bottom: 1px solid transparent;
+    background: var(--maya-header-background);
+    color: var(--maya-header-text);
+    transition: box-shadow var(--transition-fast) var(--easing-standard), border-color var(--transition-fast) var(--easing-standard);
+  }
+
+  .maya-header--scroll-shadow .maya-header__bar.is-scrolled {
+    border-color: var(--color-border);
+    box-shadow: var(--shadow-small);
+  }
+
+  .maya-header__inner {
     display: flex;
+    min-height: var(--maya-header-height);
     align-items: center;
     justify-content: space-between;
+    gap: var(--space-4);
   }
-  header a {
-    position: relative;
+
+  .maya-header__logo {
+    display: inline-flex;
+    width: var(--maya-logo-width-desktop);
+    flex: 0 1 auto;
+    align-items: center;
+    color: var(--maya-header-text);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-h3);
     text-decoration: none;
-    color: var(--color-foreground);
+  }
+
+  .maya-header__logo img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .maya-header__navigation {
+    margin-inline-start: auto;
+  }
+
+  .maya-header__navigation ul,
+  .maya-mobile-drawer__navigation ul {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: clamp(1rem, 2vw, 2.5rem);
+    padding: 0;
+    margin: 0;
+    list-style: none;
   }
-  header a sup {
+
+  .maya-header__navigation a {
+    position: relative;
+    display: block;
+    padding-block: var(--space-1);
+    color: var(--maya-header-text);
+    font-size: 0.9375rem;
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+  }
+
+  .maya-header__navigation a::after {
     position: absolute;
-    left: 100%;
-    overflow: hidden;
-    max-width: var(--page-margin);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    transform: scaleX(0);
+    transform-origin: center;
+    background: var(--maya-header-accent);
+    content: '';
+    transition: transform var(--transition-fast) var(--easing-standard);
   }
-  header svg {
+
+  .maya-header__navigation a.is-active {
+    color: var(--maya-header-accent);
+  }
+
+  .maya-header__navigation a.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .maya-header--no-active-underline .maya-header__navigation a::after {
+    display: none;
+  }
+
+  .maya-header__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .maya-header__order {
+    min-height: 3.5rem;
+    padding-inline: 1.5rem;
+  }
+
+  .maya-header__order .maya-icon {
+    display: inline-flex;
+    width: var(--maya-order-icon-size);
+    height: var(--maya-order-icon-size);
+    line-height: 0;
+    filter: brightness(0) invert(1);
+  }
+
+  .maya-header__order .maya-icon svg,
+  .maya-header__menu-button .maya-icon svg,
+  .maya-mobile-drawer .maya-icon svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .maya-header__menu-button {
+    display: none;
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--maya-header-text);
+    cursor: pointer;
+  }
+
+  .maya-header__menu-button .maya-icon {
+    display: block;
+    width: 2rem;
+    margin: auto;
+  }
+
+  .maya-mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(92vw, var(--maya-drawer-max-width));
+    max-width: 100%;
+    max-height: none;
+    padding: 0;
+    margin: 0;
+    transform: translateX(100%);
+    border: 0;
+    background: var(--maya-drawer-background);
+    color: var(--maya-drawer-text);
+    box-shadow: -12px 0 34px rgb(29 25 22 / 24%);
+    transition: transform var(--transition-slow) var(--easing-emphasized);
+  }
+
+  .maya-mobile-drawer[open].is-open {
+    transform: translateX(0);
+  }
+
+  .maya-mobile-drawer::backdrop {
+    background: rgb(29 25 22 / 62%);
+  }
+
+  .maya-mobile-drawer__panel {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    padding: clamp(1.5rem, 5vw, 3rem);
+    overflow-y: auto;
+  }
+
+  .maya-mobile-drawer__top {
+    display: flex;
+    min-height: var(--touch-target-min);
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .maya-mobile-drawer__brand {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--maya-drawer-accent);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-h3);
+  }
+
+  .maya-mobile-drawer__brand > .maya-icon,
+  .maya-mobile-drawer__brand > img:first-child {
+    width: 3rem;
+    flex: 0 0 auto;
+  }
+
+  .maya-mobile-drawer__brand > img:not(:first-child) {
+    width: min(13rem, 100%);
+    max-height: 3.5rem;
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .maya-mobile-drawer__close {
+    display: grid;
+    width: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    padding: 0;
+    border: 0;
+    place-items: center;
+    background: transparent;
+    color: var(--maya-drawer-accent);
+    cursor: pointer;
+  }
+
+  .maya-mobile-drawer__close .maya-icon {
     width: 2rem;
   }
-  header .header__menu,
-  header .header__icons {
+
+  .maya-mobile-drawer__divider {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block: var(--space-5) var(--space-3);
+    color: var(--maya-drawer-accent);
+  }
+
+  .maya-mobile-drawer__divider > span {
+    height: 1px;
+    flex: 1;
+    background: color-mix(in srgb, var(--maya-drawer-accent) 70%, transparent);
+  }
+
+  .maya-mobile-drawer__divider .maya-icon {
+    width: 1.75rem;
+  }
+
+  .maya-mobile-drawer__navigation ul {
+    display: block;
+  }
+
+  .maya-mobile-drawer__navigation li {
+    border-bottom: 1px solid color-mix(in srgb, var(--maya-drawer-accent) 40%, transparent);
+  }
+
+  .maya-header--no-drawer-dividers .maya-mobile-drawer__navigation li {
+    border-bottom: 0;
+  }
+
+  .maya-mobile-drawer__navigation a {
+    display: flex;
+    min-height: 5.5rem;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--maya-drawer-text);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .maya-mobile-drawer__navigation a[aria-current='page'] {
+    color: var(--maya-drawer-accent);
+  }
+
+  .maya-mobile-drawer__navigation .maya-icon {
+    width: 2.35rem;
+    flex: 0 0 auto;
+    color: var(--maya-drawer-accent);
+  }
+
+  .maya-mobile-drawer__order {
+    width: 100%;
+    min-height: var(--button-height-large);
+    margin-block: var(--space-5);
+  }
+
+  .maya-mobile-drawer__order .maya-icon {
+    display: inline-flex;
+    width: var(--maya-order-icon-size);
+    height: var(--maya-order-icon-size);
+    line-height: 0;
+    filter: brightness(0) invert(1);
+  }
+
+  .maya-mobile-drawer__social,
+  .maya-mobile-drawer__contact {
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--maya-drawer-accent) 40%, transparent);
+  }
+
+  .maya-header--no-drawer-dividers .maya-mobile-drawer__social,
+  .maya-header--no-drawer-dividers .maya-mobile-drawer__contact {
+    border-top: 0;
+  }
+
+  .maya-mobile-drawer__social p {
+    margin-bottom: var(--space-2);
+    color: var(--maya-drawer-text);
+    font-family: var(--font-heading);
+    font-size: var(--font-size-h3);
+  }
+
+  .maya-mobile-drawer__social > div {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .maya-mobile-drawer__social a {
+    display: grid;
+    width: 3.25rem;
+    height: 3.25rem;
+    place-items: center;
+    border: 1px solid var(--maya-drawer-accent);
+    border-radius: var(--radius-round);
+    color: var(--maya-drawer-accent);
+    text-decoration: none;
+  }
+
+  .maya-mobile-drawer__social .maya-icon {
+    width: 1.5rem;
+  }
+
+  .maya-mobile-drawer__contact {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .maya-mobile-drawer__contact a {
+    display: flex;
+    min-height: var(--touch-target-min);
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--maya-drawer-text);
+    text-decoration: none;
+  }
+
+  .maya-mobile-drawer__contact .maya-icon {
+    display: grid;
+    width: 3.25rem;
+    min-width: 3.25rem;
+    height: 3.25rem;
+    place-items: center;
+    border: 1px solid var(--maya-drawer-accent);
+    border-radius: var(--radius-round);
+    color: var(--maya-drawer-accent);
+  }
+
+  .maya-mobile-drawer__contact .maya-icon svg {
+    width: 1.5rem;
+  }
+
+  .maya-mobile-drawer__contact span {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .maya-mobile-drawer__contact small {
+    color: var(--maya-drawer-accent);
+    font-size: var(--font-size-label);
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .maya-header__navigation a:hover::after {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .maya-header__navigation,
+    .maya-header__order {
+      display: none;
+    }
+
+    .maya-header__menu-button {
+      display: grid;
+      place-items: center;
+    }
+  }
+
+  @media (min-width: 1101px) {
+    .maya-mobile-drawer {
+      display: none;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .maya-header__inner,
+    .maya-header__bar {
+      min-height: max(5.75rem, var(--maya-header-height));
+    }
+
+    .maya-header__logo {
+      width: var(--maya-logo-width-mobile);
+    }
   }
 {% endstylesheet %}
 
+{% javascript %}
+  if (!customElements.get('maya-header')) {
+    class MayaHeader extends HTMLElement {
+      connectedCallback() {
+        this.menuButton = this.querySelector('[data-maya-menu-button]');
+        this.drawer = this.querySelector('[data-maya-drawer]');
+        this.closeButton = this.querySelector('[data-maya-close-button]');
+        this.headerBar = this.querySelector('[data-maya-header-bar]');
+        this.lastScrollPosition = window.scrollY;
+        this.closeTimer = null;
+        this.lastFocusedElement = null;
+
+        this.onMenuButtonClick = this.openDrawer.bind(this);
+        this.onCloseButtonClick = this.closeDrawer.bind(this);
+        this.onDrawerClick = this.handleDrawerClick.bind(this);
+        this.onDrawerCancel = this.handleDrawerCancel.bind(this);
+        this.onDrawerKeydown = this.handleDrawerKeydown.bind(this);
+        this.onDrawerClose = this.handleDrawerClose.bind(this);
+        this.onScroll = this.handleScroll.bind(this);
+        this.onResize = this.updateStickyOffset.bind(this);
+
+        if (this.menuButton && this.drawer) {
+          this.menuButton.addEventListener('click', this.onMenuButtonClick);
+          this.closeButton?.addEventListener('click', this.onCloseButtonClick);
+          this.drawer.addEventListener('click', this.onDrawerClick);
+          this.drawer.addEventListener('cancel', this.onDrawerCancel);
+          this.drawer.addEventListener('keydown', this.onDrawerKeydown);
+          this.drawer.addEventListener('close', this.onDrawerClose);
+        }
+
+        window.addEventListener('scroll', this.onScroll, { passive: true });
+        window.addEventListener('resize', this.onResize);
+        this.resizeObserver = new ResizeObserver(this.onResize);
+        const announcement = document.querySelector('[data-maya-announcement]');
+        if (announcement) this.resizeObserver.observe(announcement);
+        this.updateStickyOffset();
+        this.handleScroll();
+      }
+
+      disconnectedCallback() {
+        this.menuButton?.removeEventListener('click', this.onMenuButtonClick);
+        this.closeButton?.removeEventListener('click', this.onCloseButtonClick);
+        this.drawer?.removeEventListener('click', this.onDrawerClick);
+        this.drawer?.removeEventListener('cancel', this.onDrawerCancel);
+        this.drawer?.removeEventListener('keydown', this.onDrawerKeydown);
+        this.drawer?.removeEventListener('close', this.onDrawerClose);
+        window.removeEventListener('scroll', this.onScroll);
+        window.removeEventListener('resize', this.onResize);
+        this.resizeObserver?.disconnect();
+        window.clearTimeout(this.closeTimer);
+      }
+
+      openDrawer() {
+        if (!this.drawer || this.drawer.open) return;
+        this.lastFocusedElement = document.activeElement;
+        this.drawer.showModal();
+        document.body.classList.add('no-scroll');
+        this.menuButton?.setAttribute('aria-expanded', 'true');
+        window.requestAnimationFrame(() => this.drawer.classList.add('is-open'));
+        this.closeButton?.focus({ preventScroll: true });
+      }
+
+      closeDrawer() {
+        if (!this.drawer || !this.drawer.open) return;
+        this.drawer.classList.remove('is-open');
+        const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+        window.clearTimeout(this.closeTimer);
+        this.closeTimer = window.setTimeout(() => {
+          if (this.drawer.open) this.drawer.close();
+        }, duration);
+      }
+
+      handleDrawerClick(event) {
+        if (event.target === this.drawer) this.closeDrawer();
+      }
+
+      handleDrawerCancel(event) {
+        event.preventDefault();
+        this.closeDrawer();
+      }
+
+      handleDrawerKeydown(event) {
+        if (event.key !== 'Tab') return;
+        const focusable = [...this.drawer.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+          .filter((element) => !element.hidden);
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+
+      handleDrawerClose() {
+        this.drawer.classList.remove('is-open');
+        document.body.classList.remove('no-scroll');
+        this.menuButton?.setAttribute('aria-expanded', 'false');
+        const focusTarget = this.menuButton || this.lastFocusedElement;
+        focusTarget?.focus({ preventScroll: true });
+      }
+
+      handleScroll() {
+        const currentPosition = window.scrollY;
+        this.headerBar?.classList.toggle('is-scrolled', currentPosition > 4);
+        const announcements = document.querySelectorAll('[data-hide-on-scroll]');
+        announcements.forEach((announcement) => {
+          const shouldHide = currentPosition > 80 && currentPosition > this.lastScrollPosition;
+          announcement.classList.toggle('is-hidden', shouldHide);
+        });
+        this.lastScrollPosition = currentPosition;
+        this.updateStickyOffset();
+      }
+
+      updateStickyOffset() {
+        if (!this.classList.contains('maya-header--sticky')) {
+          document.documentElement.style.setProperty('--maya-anchor-offset', '0px');
+          return;
+        }
+        const announcement = document.querySelector('[data-maya-announcement].maya-announcement--sticky');
+        const offset = announcement && !announcement.classList.contains('is-hidden') ? announcement.getBoundingClientRect().height : 0;
+        this.style.setProperty('--maya-header-offset', `${offset}px`);
+        const headerHeight = this.headerBar?.getBoundingClientRect().height || 0;
+        document.documentElement.style.setProperty('--maya-anchor-offset', `${offset + headerHeight}px`);
+      }
+    }
+
+    customElements.define('maya-header', MayaHeader);
+  }
+{% endjavascript %}
+
 {% schema %}
 {
-  "name": "t:general.header",
+  "name": "t:sections.maya_header.name",
+  "enabled_on": {
+    "groups": ["header"]
+  },
   "settings": [
     {
-      "type": "link_list",
-      "id": "menu",
-      "label": "t:labels.menu"
+      "type": "header",
+      "content": "t:sections.maya_header.navigation"
     },
     {
       "type": "link_list",
-      "id": "customer_account_menu",
-      "label": "t:labels.customer_account_menu",
-      "default": "customer-account-main-menu"
+      "id": "menu",
+      "label": "t:sections.maya_header.menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "t:sections.maya_header.logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_width_desktop",
+      "min": 120,
+      "max": 240,
+      "step": 5,
+      "unit": "px",
+      "label": "t:sections.maya_header.logo_width_desktop",
+      "default": 180
+    },
+    {
+      "type": "range",
+      "id": "logo_width_mobile",
+      "min": 100,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "t:sections.maya_header.logo_width_mobile",
+      "default": 145
+    },
+    {
+      "type": "range",
+      "id": "header_height",
+      "min": 96,
+      "max": 128,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.maya_header.header_height",
+      "default": 112
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "t:sections.maya_header.background_color",
+      "default": "#F7F1E8"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:sections.maya_header.text_color",
+      "default": "#28221E"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.maya_header.accent_color",
+      "default": "#C5A265"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "t:sections.maya_header.enable_sticky",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_shadow",
+      "label": "t:sections.maya_header.show_scroll_shadow",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_active_link_underline",
+      "label": "t:sections.maya_header.show_active_link_underline",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_header.order_button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_order_button",
+      "label": "t:sections.maya_header.show_order_button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "order_label",
+      "label": "t:sections.maya_header.order_label",
+      "default": "Order Now"
+    },
+    {
+      "type": "url",
+      "id": "order_url",
+      "label": "t:sections.maya_header.order_url"
+    },
+    {
+      "type": "select",
+      "id": "order_icon",
+      "label": "t:sections.maya_header.order_icon",
+      "options": [
+        { "value": "bag", "label": "t:sections.maya_header.icon_bag" },
+        { "value": "coffee", "label": "t:sections.maya_header.icon_coffee" },
+        { "value": "none", "label": "t:sections.maya_header.icon_none" }
+      ],
+      "default": "bag"
+    },
+    {
+      "type": "range",
+      "id": "order_icon_size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "t:sections.maya_header.order_icon_size",
+      "default": 28
+    },
+    {
+      "type": "checkbox",
+      "id": "order_new_tab",
+      "label": "t:sections.maya_header.order_new_tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_header.mobile_drawer"
+    },
+    {
+      "type": "range",
+      "id": "drawer_width",
+      "min": 320,
+      "max": 560,
+      "step": 8,
+      "unit": "px",
+      "label": "t:sections.maya_header.drawer_width",
+      "default": 480
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact_details",
+      "label": "t:sections.maya_header.show_contact_details",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_drawer_social",
+      "label": "t:sections.maya_header.show_drawer_social",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_drawer_logo",
+      "label": "t:sections.maya_header.show_drawer_logo",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_drawer_dividers",
+      "label": "t:sections.maya_header.show_drawer_dividers",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "drawer_background_color",
+      "label": "t:sections.maya_header.drawer_background_color",
+      "default": "#1D1916"
+    },
+    {
+      "type": "color",
+      "id": "drawer_text_color",
+      "label": "t:sections.maya_header.drawer_text_color",
+      "default": "#FFF9F0"
+    },
+    {
+      "type": "color",
+      "id": "drawer_accent_color",
+      "label": "t:sections.maya_header.drawer_accent_color",
+      "default": "#C5A265"
     }
   ]
 }
