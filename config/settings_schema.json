@@ -8,48 +8,52 @@
     "theme_support_url": "https://support.shopify.com/"
   },
   {
-    "name": "t:general.typography",
+    "name": "t:general.brand_assets",
     "settings": [
       {
-        "type": "header",
-        "content": "t:general.fonts"
+        "type": "image_picker",
+        "id": "logo_light",
+        "label": "t:labels.logo_light"
       },
       {
-        "type": "font_picker",
-        "id": "type_primary_font",
-        "default": "work_sans_n4",
-        "label": "t:general.primary"
-      }
-    ]
-  },
-  {
-    "name": "t:general.layout",
-    "settings": [
+        "type": "image_picker",
+        "id": "logo_dark",
+        "label": "t:labels.logo_dark"
+      },
       {
-        "type": "select",
-        "id": "max_page_width",
-        "label": "t:labels.page_width",
-        "options": [
-          {
-            "value": "90rem",
-            "label": "t:options.page_width.narrow"
-          },
-          {
-            "value": "110rem",
-            "label": "t:options.page_width.wide"
-          }
-        ],
-        "default": "90rem"
+        "type": "image_picker",
+        "id": "logo_gold",
+        "label": "t:labels.logo_gold"
+      },
+      {
+        "type": "image_picker",
+        "id": "logo_mark",
+        "label": "t:labels.logo_mark"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "t:labels.favicon"
       },
       {
         "type": "range",
-        "id": "min_page_margin",
-        "min": 10,
-        "max": 100,
-        "step": 1,
+        "id": "logo_width_desktop",
+        "min": 120,
+        "max": 240,
+        "step": 5,
         "unit": "px",
-        "label": "t:labels.page_margin",
-        "default": 20
+        "label": "t:labels.logo_width_desktop",
+        "default": 180
+      },
+      {
+        "type": "range",
+        "id": "logo_width_mobile",
+        "min": 100,
+        "max": 200,
+        "step": 5,
+        "unit": "px",
+        "label": "t:labels.logo_width_mobile",
+        "default": 145
       }
     ]
   },
@@ -59,14 +63,122 @@
       {
         "type": "color",
         "id": "background_color",
-        "default": "#FFFFFF",
+        "default": "#F7F1E8",
         "label": "t:labels.background"
       },
       {
         "type": "color",
         "id": "foreground_color",
-        "default": "#333333",
+        "default": "#28221E",
         "label": "t:labels.foreground"
+      },
+      {
+        "type": "color",
+        "id": "color_surface",
+        "default": "#FFFDF8",
+        "label": "t:labels.color_surface"
+      },
+      {
+        "type": "color",
+        "id": "color_espresso",
+        "default": "#1D1916",
+        "label": "t:labels.color_espresso"
+      },
+      {
+        "type": "color",
+        "id": "color_caramel",
+        "default": "#B97845",
+        "label": "t:labels.color_caramel"
+      },
+      {
+        "type": "color",
+        "id": "color_coffee",
+        "default": "#76503A",
+        "label": "t:labels.color_coffee"
+      },
+      {
+        "type": "color",
+        "id": "color_gold",
+        "default": "#C5A265",
+        "label": "t:labels.color_gold"
+      },
+      {
+        "type": "color",
+        "id": "color_rose",
+        "default": "#D9AAA7",
+        "label": "t:labels.color_rose"
+      },
+      {
+        "type": "color",
+        "id": "color_sage",
+        "default": "#7F8B71",
+        "label": "t:labels.color_sage"
+      },
+      {
+        "type": "color",
+        "id": "color_text_secondary",
+        "default": "#6E655E",
+        "label": "t:labels.color_text_secondary"
+      },
+      {
+        "type": "color",
+        "id": "color_text_muted",
+        "default": "#91877F",
+        "label": "t:labels.color_text_muted"
+      },
+      {
+        "type": "color",
+        "id": "color_text_inverse",
+        "default": "#FFF9F0",
+        "label": "t:labels.color_text_inverse"
+      },
+      {
+        "type": "color",
+        "id": "color_border",
+        "default": "#E5DDD3",
+        "label": "t:labels.color_border"
+      },
+      {
+        "type": "color",
+        "id": "color_primary_button_background",
+        "default": "#1D1916",
+        "label": "t:labels.color_primary_button_background"
+      },
+      {
+        "type": "color",
+        "id": "color_primary_button_text",
+        "default": "#F7F1E8",
+        "label": "t:labels.color_primary_button_text"
+      },
+      {
+        "type": "color",
+        "id": "color_primary_button_hover",
+        "default": "#76503A",
+        "label": "t:labels.color_primary_button_hover"
+      },
+      {
+        "type": "color",
+        "id": "color_outline_button",
+        "default": "#76503A",
+        "label": "t:labels.color_outline_button"
+      },
+      {
+        "type": "color",
+        "id": "color_focus",
+        "default": "#B97845",
+        "label": "t:labels.color_focus"
+      },
+      {
+        "type": "color",
+        "id": "color_success",
+        "default": "#7F8B71",
+        "label": "t:labels.color_success"
+      },
+      {
+        "type": "color",
+        "id": "color_error",
+        "default": "#A83D36",
+        "label": "t:labels.color_error"
       },
       {
         "type": "range",
@@ -77,6 +189,346 @@
         "unit": "px",
         "label": "t:labels.input_corner_radius",
         "default": 4
+      }
+    ]
+  },
+  {
+    "name": "t:general.typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:general.fonts"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_heading_font",
+        "default": "dm_serif_display_n4",
+        "label": "t:labels.heading_font"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "default": "manrope_n4",
+        "label": "t:labels.body_font"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_primary_font",
+        "default": "work_sans_n4",
+        "label": "t:labels.legacy_primary_font"
+      }
+    ]
+  },
+  {
+    "name": "t:general.layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "max_page_width",
+        "min": 1100,
+        "max": 1400,
+        "step": 20,
+        "unit": "px",
+        "label": "t:labels.page_width",
+        "default": 1240
+      },
+      {
+        "type": "range",
+        "id": "min_page_margin",
+        "min": 32,
+        "max": 96,
+        "step": 4,
+        "unit": "px",
+        "label": "t:labels.desktop_page_padding",
+        "default": 72
+      },
+      {
+        "type": "range",
+        "id": "tablet_page_padding",
+        "min": 24,
+        "max": 64,
+        "step": 4,
+        "unit": "px",
+        "label": "t:labels.tablet_page_padding",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "mobile_page_padding",
+        "min": 16,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.mobile_page_padding",
+        "default": 24
+      },
+      {
+        "type": "range",
+        "id": "section_spacing_desktop",
+        "min": 64,
+        "max": 160,
+        "step": 8,
+        "unit": "px",
+        "label": "t:labels.desktop_section_spacing",
+        "default": 112
+      },
+      {
+        "type": "range",
+        "id": "section_spacing_tablet",
+        "min": 56,
+        "max": 120,
+        "step": 8,
+        "unit": "px",
+        "label": "t:labels.tablet_section_spacing",
+        "default": 80
+      },
+      {
+        "type": "range",
+        "id": "section_spacing_mobile",
+        "min": 48,
+        "max": 96,
+        "step": 8,
+        "unit": "px",
+        "label": "t:labels.mobile_section_spacing",
+        "default": 72
+      }
+    ]
+  },
+  {
+    "name": "t:general.buttons_cards",
+    "settings": [
+      {
+        "type": "range",
+        "id": "card_corner_radius",
+        "min": 8,
+        "max": 32,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.card_corner_radius",
+        "default": 18
+      },
+      {
+        "type": "range",
+        "id": "button_corner_radius",
+        "min": 0,
+        "max": 24,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.button_corner_radius",
+        "default": 12
+      },
+      {
+        "type": "range",
+        "id": "card_border_width",
+        "min": 0,
+        "max": 3,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.card_border_width",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "button_height",
+        "min": 44,
+        "max": 64,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.button_height",
+        "default": 48
+      },
+      {
+        "type": "range",
+        "id": "button_height_large",
+        "min": 48,
+        "max": 72,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.button_height_large",
+        "default": 52
+      },
+      {
+        "type": "range",
+        "id": "card_shadow_strength",
+        "min": 0,
+        "max": 3,
+        "step": 1,
+        "label": "t:labels.card_shadow_strength",
+        "default": 1
+      },
+      {
+        "type": "range",
+        "id": "card_transition_duration",
+        "min": 200,
+        "max": 500,
+        "step": 10,
+        "unit": "ms",
+        "label": "t:labels.card_transition_duration",
+        "default": 350
+      }
+    ]
+  },
+  {
+    "name": "t:general.business_information",
+    "settings": [
+      {
+        "type": "text",
+        "id": "cafe_name",
+        "label": "t:labels.cafe_name",
+        "default": "Maya's Cafe"
+      },
+      {
+        "type": "textarea",
+        "id": "cafe_short_description",
+        "label": "t:labels.cafe_short_description",
+        "default": "Affordable meals, refreshing drinks, and a relaxing space for coffee, conversations, and quiet moments."
+      },
+      {
+        "type": "text",
+        "id": "cafe_phone",
+        "label": "t:labels.cafe_phone",
+        "default": "0967 306 9984"
+      },
+      {
+        "type": "text",
+        "id": "cafe_address",
+        "label": "t:labels.cafe_address",
+        "default": "Ibingay Street, Brgy. Ibingay"
+      },
+      {
+        "type": "text",
+        "id": "cafe_city",
+        "label": "t:labels.cafe_city",
+        "default": "Masbate City"
+      },
+      {
+        "type": "text",
+        "id": "cafe_postal_code",
+        "label": "t:labels.cafe_postal_code",
+        "default": "5400 Masbate"
+      },
+      {
+        "type": "url",
+        "id": "cafe_directions_url",
+        "label": "t:labels.cafe_directions_url"
+      },
+      {
+        "type": "url",
+        "id": "cafe_map_embed_url",
+        "label": "t:labels.cafe_map_embed_url"
+      },
+      {
+        "type": "url",
+        "id": "cafe_order_url",
+        "label": "t:labels.cafe_order_url"
+      },
+      {
+        "type": "text",
+        "id": "cafe_opening_status_text",
+        "label": "t:labels.cafe_opening_status_text",
+        "default": "Hours to be confirmed"
+      },
+      {
+        "type": "text",
+        "id": "cafe_hours_summary",
+        "label": "t:labels.cafe_hours_summary",
+        "default": "Add confirmed opening hours"
+      },
+      {
+        "type": "textarea",
+        "id": "cafe_weekly_hours",
+        "label": "t:labels.cafe_weekly_hours",
+        "default": "Add confirmed opening hours"
+      },
+      {
+        "type": "checkbox",
+        "id": "service_dine_in",
+        "label": "t:labels.service_dine_in",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "service_takeout",
+        "label": "t:labels.service_takeout",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "service_pickup",
+        "label": "t:labels.service_pickup",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "service_delivery",
+        "label": "t:labels.service_delivery",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "service_no_contact_delivery",
+        "label": "t:labels.service_no_contact_delivery",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "service_parking",
+        "label": "t:labels.service_parking",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "cafe_rating",
+        "min": 0,
+        "max": 5,
+        "step": 0.1,
+        "label": "t:labels.cafe_rating",
+        "default": 4.6
+      },
+      {
+        "type": "range",
+        "id": "cafe_review_count",
+        "min": 0,
+        "max": 1000,
+        "step": 1,
+        "label": "t:labels.cafe_review_count",
+        "default": 5
+      }
+    ]
+  },
+  {
+    "name": "t:general.social_links",
+    "settings": [
+      {
+        "type": "url",
+        "id": "cafe_facebook_url",
+        "label": "t:labels.cafe_facebook_url"
+      },
+      {
+        "type": "url",
+        "id": "cafe_instagram_url",
+        "label": "t:labels.cafe_instagram_url"
+      }
+    ]
+  },
+  {
+    "name": "t:general.motion_accessibility",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_interaction_motion",
+        "label": "t:labels.enable_interaction_motion",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "motion_duration",
+        "min": 150,
+        "max": 400,
+        "step": 10,
+        "unit": "ms",
+        "label": "t:labels.motion_duration",
+        "default": 220
       }
     ]
   }

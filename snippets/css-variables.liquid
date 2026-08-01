@@ -1,18 +1,125 @@
+{% doc %}
+  Outputs the global Maya's Cafe design tokens and registers the selected Shopify fonts.
+
+  This snippet is rendered once from the theme layout.
+{% enddoc %}
+
+{% liquid
+  assign body_font = settings.type_body_font | default: settings.type_primary_font
+  assign heading_font = settings.type_heading_font | default: body_font
+  assign body_font_medium = body_font | font_modify: 'weight', '500'
+  assign body_font_semibold = body_font | font_modify: 'weight', '600'
+  assign body_font_bold = body_font | font_modify: 'weight', '700'
+  assign heading_font_italic = heading_font | font_modify: 'style', 'italic'
+  assign shadow_opacity = settings.card_shadow_strength | times: 4
+  assign shadow_hover_opacity = settings.card_shadow_strength | plus: 1 | times: 4
+%}
+
 {% style %}
-  {% # Loads all font variantions with display: swap %}
-  {{ settings.type_primary_font | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'weight', 'bold' | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
-  {{ settings.type_primary_font | font_modify: 'style', 'italic' | font_face: font_display: 'swap' }}
+  {{ body_font | font_face: font_display: 'swap' }}
+  {{ body_font_medium | font_face: font_display: 'swap' }}
+  {{ body_font_semibold | font_face: font_display: 'swap' }}
+  {{ body_font_bold | font_face: font_display: 'swap' }}
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ heading_font_italic | font_face: font_display: 'swap' }}
 
   :root {
-    --font-primary--family: {{ settings.type_primary_font.family }}, {{ settings.type_primary_font.fallback_families }};
-    --font-primary--style: {{ settings.type_primary_font.style }};
-    --font-primary--weight: {{ settings.type_primary_font.weight }};
-    --page-width: {{ settings.max_page_width }};
-    --page-margin: {{ settings.min_page_margin }}px;
+    --font-heading: {{ heading_font.family | default: 'DM Serif Display' }}, Georgia, "Times New Roman", serif;
+    --font-body: {{ body_font.family | default: 'Manrope' }}, Inter, Arial, sans-serif;
+    --font-primary--family: var(--font-body);
+    --font-primary--style: {{ body_font.style | default: 'normal' }};
+    --font-primary--weight: {{ body_font.weight | default: 400 }};
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --font-size-display: clamp(2.625rem, 4.5vw + 1rem, 4.5rem);
+    --font-size-h1: clamp(2.375rem, 3vw + 1rem, 3.75rem);
+    --font-size-h2: clamp(2.125rem, 2.4vw + 1rem, 3.25rem);
+    --font-size-h3: clamp(1.375rem, 1.2vw + 1rem, 1.875rem);
+    --font-size-body-large: clamp(1.0625rem, 0.25vw + 1rem, 1.125rem);
+    --font-size-body: 1rem;
+    --font-size-small: 0.875rem;
+    --font-size-label: 0.875rem;
+    --font-size-button: 1rem;
+    --line-height-heading: 1.08;
+    --line-height-body: 1.6;
+    --letter-spacing-label: 0.08em;
+
+    --space-0: 0;
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+    --space-4: 2rem;
+    --space-5: 2.5rem;
+    --space-6: 3rem;
+    --space-8: 4rem;
+    --space-10: 5rem;
+    --space-12: 6rem;
+    --space-14: 7rem;
+    --space-15: 7.5rem;
+
+    --page-width: {{ settings.max_page_width }}px;
+    --page-padding-desktop: {{ settings.min_page_margin }}px;
+    --page-padding-tablet: {{ settings.tablet_page_padding }}px;
+    --page-padding-mobile: {{ settings.mobile_page_padding }}px;
+    --page-padding: var(--page-padding-desktop);
+    --page-margin: var(--page-padding);
+    --section-spacing-desktop: {{ settings.section_spacing_desktop }}px;
+    --section-spacing-tablet: {{ settings.section_spacing_tablet }}px;
+    --section-spacing-mobile: {{ settings.section_spacing_mobile }}px;
+    --section-spacing: var(--section-spacing-desktop);
+    --content-gap: var(--space-4);
+    --card-gap: var(--space-3);
+
+    --color-espresso: {{ settings.color_espresso }};
     --color-background: {{ settings.background_color }};
-    --color-foreground: {{ settings.foreground_color }};
+    --color-surface: {{ settings.color_surface }};
+    --color-caramel: {{ settings.color_caramel }};
+    --color-coffee: {{ settings.color_coffee }};
+    --color-gold: {{ settings.color_gold }};
+    --color-rose: {{ settings.color_rose }};
+    --color-sage: {{ settings.color_sage }};
+    --color-text: {{ settings.foreground_color }};
+    --color-foreground: var(--color-text);
+    --color-text-secondary: {{ settings.color_text_secondary }};
+    --color-text-muted: {{ settings.color_text_muted }};
+    --color-text-inverse: {{ settings.color_text_inverse }};
+    --color-border: {{ settings.color_border }};
+    --color-button-primary-bg: {{ settings.color_primary_button_background }};
+    --color-button-primary-text: {{ settings.color_primary_button_text }};
+    --color-button-primary-hover: {{ settings.color_primary_button_hover }};
+    --color-button-outline: {{ settings.color_outline_button }};
+    --color-focus: {{ settings.color_focus }};
+    --color-success: {{ settings.color_success }};
+    --color-error: {{ settings.color_error }};
+
+    --radius-small: 0.5rem;
+    --radius-button: {{ settings.button_corner_radius }}px;
+    --radius-card: {{ settings.card_corner_radius }}px;
+    --radius-pill: 999px;
+    --radius-round: 50%;
+    --border-width: {{ settings.card_border_width }}px;
+    --border-default: var(--border-width) solid var(--color-border);
     --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+    --shadow-small: 0 4px 12px rgb(29 25 22 / {{ shadow_opacity }}%);
+    --shadow-card: 0 10px 28px rgb(29 25 22 / {{ shadow_opacity }}%);
+    --shadow-hover: 0 14px 34px rgb(29 25 22 / {{ shadow_hover_opacity }}%);
+    --button-height: {{ settings.button_height }}px;
+    --button-height-large: {{ settings.button_height_large }}px;
+    --touch-target-min: 44px;
+    --transition-fast: {{ settings.motion_duration }}ms;
+    --transition-default: {{ settings.motion_duration }}ms;
+    --transition-slow: {{ settings.card_transition_duration }}ms;
+    --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --easing-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --interaction-lift: {% if settings.enable_interaction_motion %}2px{% else %}0px{% endif %};
+    --z-header: 20;
+    --z-drawer: 40;
+    --z-modal: 60;
+    --z-toast: 80;
+    --logo-width-desktop: {{ settings.logo_width_desktop }}px;
+    --logo-width-mobile: {{ settings.logo_width_mobile }}px;
   }
 {% endstyle %}
