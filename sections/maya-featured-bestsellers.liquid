@@ -1,0 +1,1133 @@
+{% liquid
+  assign featured_collection = section.settings.product_collection
+  assign section_heading = section.settings.heading
+  if section_heading == blank
+    assign section_heading = 'featured_bestsellers.default_heading' | t
+  endif
+
+  assign menu_url = section.settings.menu_url
+  if menu_url == blank
+    if featured_collection != blank
+      assign menu_url = featured_collection.url
+    else
+      assign menu_url = routes.all_products_collection_url
+    endif
+  endif
+
+  assign has_products = false
+  if section.settings.product_source == 'collection'
+    if featured_collection != blank
+      if featured_collection.products_count > 0
+        assign has_products = true
+      endif
+    endif
+  else
+    for block in section.blocks
+      if block.settings.product != blank
+        assign has_products = true
+        break
+      endif
+    endfor
+    if request.design_mode
+      if section.blocks.size > 0
+        assign has_products = true
+      endif
+    endif
+  endif
+%}
+
+{% if section.settings.show_section %}
+  {% if has_products or request.design_mode %}
+    <section
+      id="MayaFeatured-{{ section.id }}"
+      class="maya-featured full-width{% if section.settings.enable_curved_top %} maya-featured--curved{% endif %}{% if section.settings.enable_product_image_hover %} maya-featured--image-zoom{% endif %}{% if section.settings.show_second_image %} maya-featured--second-image{% endif %} maya-featured--mobile-{{ section.settings.mobile_card_layout }}"
+      aria-labelledby="MayaFeaturedTitle-{{ section.id }}"
+      style="--maya-featured-background: {{ section.settings.section_background }}; --maya-featured-card-background: {{ section.settings.card_background }}; --maya-featured-card-border: {{ section.settings.card_border_color }}; --maya-featured-accent: {{ section.settings.accent_color }}; --maya-featured-heading: {{ section.settings.heading_color }}; --maya-featured-body: {{ section.settings.body_text_color }}; --maya-featured-space-top: {{ section.settings.section_top_spacing }}px; --maya-featured-space-bottom: {{ section.settings.section_bottom_spacing }}px; --maya-featured-desktop-columns: {{ section.settings.desktop_columns }}; --maya-featured-tablet-columns: {{ section.settings.tablet_columns }}; --maya-featured-image-ratio-desktop: {{ section.settings.desktop_image_ratio }}; --maya-featured-image-ratio-mobile: {{ section.settings.mobile_image_ratio }}; --maya-featured-image-position: {{ section.settings.image_crop_position }}; --maya-featured-divider-color: {{ section.settings.divider_color }}; --maya-featured-divider-width: {{ section.settings.divider_width }}px;"
+      data-section-id="{{ section.id }}"
+    >
+      <div class="maya-featured__inner page-width">
+        <header class="maya-featured__header">
+          <div class="maya-featured__heading-content">
+            {% if section.settings.eyebrow != blank %}
+              <p class="maya-featured__eyebrow">
+                {% render 'maya-icon', name: 'sun' %}
+                <span>{{ section.settings.eyebrow | escape }}</span>
+              </p>
+            {% endif %}
+
+            <h2 id="MayaFeaturedTitle-{{ section.id }}" class="maya-featured__title">{{ section_heading | escape }}</h2>
+
+            {% if section.settings.show_heading_divider %}
+              <div class="maya-featured__heading-divider" aria-hidden="true">
+                <span class="maya-featured__divider-line"></span>
+                {% render 'maya-icon', name: section.settings.heading_divider_icon %}
+                <span class="maya-featured__divider-line"></span>
+              </div>
+            {% endif %}
+
+            {% if section.settings.description != blank %}
+              <p class="maya-featured__description">{{ section.settings.description | escape | newline_to_br }}</p>
+            {% endif %}
+          </div>
+
+          {% if section.settings.show_menu_button %}
+            <a
+              class="button button--outline maya-featured__menu-action"
+              href="{{ menu_url }}"
+              {% if section.settings.menu_new_tab %}
+                target="_blank" rel="noopener noreferrer"
+              {% endif %}
+            >
+              <span>{{ section.settings.menu_label | escape }}</span>
+              {% render 'maya-icon', name: 'arrow' %}
+            </a>
+          {% endif %}
+        </header>
+
+        {% if has_products %}
+          <ul class="maya-featured__grid" role="list">
+            {% if section.settings.product_source == 'collection' %}
+              {% for product in featured_collection.products limit: section.settings.product_limit %}
+                {% render 'maya-product-card',
+                  product: product,
+                  action_label: section.settings.product_action_label,
+                  show_description: section.settings.show_product_description,
+                  show_category: section.settings.show_product_category,
+                  show_badge: section.settings.show_product_badge,
+                  show_price: section.settings.show_product_price,
+                  show_action: section.settings.show_product_action,
+                  show_second_image: section.settings.show_second_image,
+                  description_words: section.settings.description_words
+                %}
+              {% endfor %}
+            {% else %}
+              {% for block in section.blocks %}
+                {% if block.settings.product != blank %}
+                  {% liquid
+                    assign visibility_class = blank
+                    if block.settings.hide_mobile
+                      assign visibility_class = 'maya-product-card--hide-mobile'
+                    endif
+                    if block.settings.hide_desktop
+                      if visibility_class != blank
+                        assign visibility_class = visibility_class | append: ' maya-product-card--hide-desktop'
+                      else
+                        assign visibility_class = 'maya-product-card--hide-desktop'
+                      endif
+                    endif
+                  %}
+                  {% render 'maya-product-card',
+                    product: block.settings.product,
+                    custom_image: block.settings.custom_image,
+                    title_override: block.settings.title_override,
+                    description_override: block.settings.description_override,
+                    category_label: block.settings.category_label,
+                    category_icon: block.settings.category_icon,
+                    badge_label: block.settings.badge_label,
+                    badge_icon: block.settings.badge_icon,
+                    custom_url: block.settings.custom_url,
+                    action_label: section.settings.product_action_label,
+                    show_description: section.settings.show_product_description,
+                    show_category: section.settings.show_product_category,
+                    show_badge: section.settings.show_product_badge,
+                    show_price: section.settings.show_product_price,
+                    show_action: section.settings.show_product_action,
+                    show_second_image: section.settings.show_second_image,
+                    description_words: section.settings.description_words,
+                    visibility_class: visibility_class,
+                    block_attributes: block.shopify_attributes
+                  %}
+                {% elsif request.design_mode %}
+                  <li class="maya-product-card maya-product-card--placeholder" {{ block.shopify_attributes }}>
+                    <div class="maya-product-card__media">
+                      {{ 'product-1' | placeholder_svg_tag: 'maya-product-card__image maya-product-card__image--placeholder' }}
+                    </div>
+                    <div class="maya-product-card__content">
+                      <p class="maya-product-card__category">{{ 'featured_bestsellers.placeholder_category' | t }}</p>
+                      <h3 class="maya-product-card__title">{{ 'featured_bestsellers.placeholder_product' | t }}</h3>
+                      <p class="maya-product-card__description">{{ 'featured_bestsellers.placeholder_description' | t }}</p>
+                    </div>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          </ul>
+        {% else %}
+          <div class="maya-featured__empty" role="status">
+            <p>{{ 'featured_bestsellers.empty_editor' | t }}</p>
+          </div>
+        {% endif %}
+
+        {% if has_products and section.settings.show_bottom_divider %}
+          <div class="maya-featured__bottom-divider" aria-hidden="true">
+            <span class="maya-featured__divider-line"></span>
+            {% render 'maya-icon', name: section.settings.bottom_divider_icon %}
+            <span class="maya-featured__divider-line"></span>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
+{% endif %}
+
+{% stylesheet %}
+  .maya-featured {
+    position: relative;
+    isolation: isolate;
+    padding-block: var(--maya-featured-space-top) var(--maya-featured-space-bottom);
+    background: var(--maya-featured-background);
+    color: var(--maya-featured-body);
+  }
+
+  .maya-featured--curved {
+    margin-top: -3rem;
+    padding-top: calc(var(--maya-featured-space-top) + 3rem);
+    border-radius: 50% 50% 0 0 / 4rem 4rem 0 0;
+  }
+
+  .maya-featured__inner {
+    display: grid;
+    gap: clamp(2.5rem, 4vw, 4rem);
+  }
+
+  .maya-featured__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-4);
+  }
+
+  .maya-featured__heading-content {
+    max-width: 44rem;
+  }
+
+  .maya-featured__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--maya-featured-accent);
+    font-size: var(--font-size-label);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-label);
+    line-height: 1.3;
+    text-transform: uppercase;
+  }
+
+  .maya-featured__eyebrow .maya-icon {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .maya-featured__eyebrow .maya-icon svg,
+  .maya-featured__heading-divider .maya-icon svg,
+  .maya-featured__bottom-divider .maya-icon svg,
+  .maya-featured__menu-action .maya-icon svg,
+  .maya-product-card .maya-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .maya-featured__title {
+    margin-top: var(--space-1);
+    color: var(--maya-featured-heading);
+    font-size: var(--font-size-h1);
+  }
+
+  .maya-featured__heading-divider,
+  .maya-featured__bottom-divider {
+    display: flex;
+    width: min(100%, var(--maya-featured-divider-width));
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--maya-featured-divider-color);
+  }
+
+  .maya-featured__heading-divider {
+    margin-top: var(--space-2);
+  }
+
+  .maya-featured__divider-line {
+    height: 1px;
+    flex: 1;
+    background: currentcolor;
+  }
+
+  .maya-featured__heading-divider .maya-icon,
+  .maya-featured__bottom-divider .maya-icon {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: 0 0 1.5rem;
+    line-height: 0;
+  }
+
+  .maya-featured__bottom-divider .maya-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-basis: 2.75rem;
+  }
+
+  .maya-featured__description {
+    max-width: 34rem;
+    margin-top: var(--space-2);
+    color: var(--maya-featured-body);
+    font-size: var(--font-size-body-large);
+    line-height: 1.55;
+  }
+
+  .maya-featured__menu-action {
+    min-height: 3.5rem;
+    padding-inline: 1.5rem;
+    border-color: var(--maya-featured-accent);
+    color: var(--maya-featured-accent);
+    white-space: nowrap;
+  }
+
+  .maya-featured__menu-action .maya-icon {
+    display: inline-flex;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 0;
+  }
+
+  .maya-featured__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--maya-featured-desktop-columns), minmax(0, 1fr));
+    gap: clamp(1.5rem, 2vw, 2rem);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .maya-product-card {
+    display: flex;
+    min-width: 0;
+    height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--maya-featured-card-border);
+    border-radius: var(--radius-card);
+    background: var(--maya-featured-card-background);
+    box-shadow: var(--shadow-small);
+    transition: transform var(--transition-fast) var(--easing-standard), box-shadow var(--transition-fast) var(--easing-standard);
+  }
+
+  .maya-product-card__media {
+    position: relative;
+    aspect-ratio: var(--maya-featured-image-ratio-desktop);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .maya-product-card__image-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .maya-product-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--maya-featured-image-position);
+    transition: transform var(--transition-fast) var(--easing-standard), opacity var(--transition-fast) var(--easing-standard);
+  }
+
+  .maya-product-card__image--secondary {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .maya-product-card__image--placeholder {
+    fill: var(--color-sage);
+  }
+
+  .maya-product-card__badge {
+    position: absolute;
+    top: var(--space-1);
+    left: var(--space-1);
+    display: inline-flex;
+    max-width: calc(100% - var(--space-2));
+    min-height: 2rem;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--maya-featured-accent) 92%, transparent);
+    color: var(--color-text-inverse);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .maya-product-card__badge .maya-icon {
+    display: inline-flex;
+    width: 1.1rem;
+    height: 1.1rem;
+    flex: 0 0 1.1rem;
+    line-height: 0;
+    filter: brightness(0) invert(1);
+  }
+
+  .maya-product-card__content {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    padding: clamp(1.125rem, 1.6vw, 1.5rem);
+  }
+
+  .maya-product-card__category {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 1.9rem;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--maya-featured-background) 74%, var(--maya-featured-card-background));
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .maya-product-card__category .maya-icon {
+    display: inline-flex;
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 1.15rem;
+    line-height: 0;
+  }
+
+  .maya-product-card__title {
+    display: -webkit-box;
+    margin-top: var(--space-2);
+    overflow: hidden;
+    color: var(--maya-featured-heading);
+    font-size: clamp(1.4rem, 1.5vw, 1.75rem);
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .maya-product-card__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .maya-product-card__description {
+    margin-top: var(--space-1);
+    color: var(--maya-featured-body);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .maya-product-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+
+  .maya-product-card__price {
+    color: var(--color-caramel);
+    font-size: 1.25rem;
+    font-weight: var(--font-weight-bold);
+    line-height: 1.25;
+  }
+
+  .maya-product-card__price s {
+    display: block;
+    margin-bottom: 0.15rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-regular);
+  }
+
+  .maya-product-card__price-from {
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .maya-product-card__action,
+  .maya-product-card__sold-out {
+    min-height: var(--touch-target-min);
+    flex: 0 0 auto;
+    border-color: var(--maya-featured-accent);
+    border-radius: var(--radius-pill);
+    color: var(--color-coffee);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .maya-product-card__action {
+    gap: 0.4rem;
+    padding: 0.35rem 0.45rem 0.35rem 0.85rem;
+  }
+
+  .maya-product-card__action .maya-icon {
+    display: inline-flex;
+    width: 1.75rem;
+    height: 1.75rem;
+    line-height: 0;
+  }
+
+  .maya-product-card__sold-out {
+    display: inline-flex;
+    align-items: center;
+    padding-inline: 0.85rem;
+    border: 1px solid var(--maya-featured-card-border);
+    color: var(--color-text-muted);
+  }
+
+  .maya-featured__bottom-divider {
+    justify-self: center;
+    margin-top: calc(-1 * var(--space-1));
+  }
+
+  .maya-featured__empty {
+    padding: var(--space-4);
+    border: 1px dashed var(--maya-featured-card-border);
+    border-radius: var(--radius-card);
+    background: var(--maya-featured-card-background);
+    color: var(--maya-featured-body);
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .maya-product-card:hover {
+      transform: translateY(calc(-1 * var(--interaction-lift)));
+      box-shadow: var(--shadow-card);
+    }
+
+    .maya-featured--image-zoom .maya-product-card:hover .maya-product-card__image--primary {
+      transform: scale(1.025);
+    }
+
+    .maya-featured--second-image .maya-product-card:hover .maya-product-card__image--secondary {
+      opacity: 1;
+    }
+
+    .button.button--outline.maya-featured__menu-action:not(:disabled):not([aria-disabled='true']):hover,
+    .button.button--outline.maya-product-card__action:not(:disabled):not([aria-disabled='true']):hover {
+      border-color: var(--color-espresso);
+      background-color: var(--color-espresso);
+      color: var(--color-text-inverse);
+    }
+
+    .button.button--outline.maya-featured__menu-action:not(:disabled):not([aria-disabled='true']):hover .maya-icon,
+    .button.button--outline.maya-product-card__action:not(:disabled):not([aria-disabled='true']):hover .maya-icon {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  @media (min-width: 1101px) and (max-width: 1300px) {
+    .maya-featured__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .maya-featured__grid {
+      grid-template-columns: repeat(var(--maya-featured-tablet-columns), minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 750px) {
+    .maya-product-card--hide-desktop {
+      display: none;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .maya-featured {
+      padding-block: max(3.5rem, var(--maya-featured-space-top)) var(--maya-featured-space-bottom);
+    }
+
+    .maya-featured--curved {
+      margin-top: -1.5rem;
+      padding-top: max(5rem, calc(var(--maya-featured-space-top) + 1.5rem));
+      border-radius: 2.25rem 2.25rem 0 0;
+    }
+
+    .maya-featured__inner {
+      gap: var(--space-5);
+    }
+
+    .maya-featured__header {
+      display: block;
+    }
+
+    .maya-featured__title {
+      font-size: clamp(2.4rem, 10.5vw, 3.5rem);
+    }
+
+    .maya-featured__heading-divider {
+      display: none;
+    }
+
+    .maya-featured__description {
+      max-width: 32ch;
+      font-size: 1rem;
+    }
+
+    .maya-featured__menu-action {
+      width: min(100%, 20.75rem);
+      min-height: 4rem;
+      margin-top: var(--space-3);
+      font-size: 1rem;
+    }
+
+    .maya-featured__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2);
+    }
+
+    .maya-product-card--hide-mobile {
+      display: none;
+    }
+
+    .maya-featured--mobile-side .maya-product-card {
+      display: grid;
+      grid-template-columns: minmax(0, 46%) minmax(0, 54%);
+    }
+
+    .maya-featured--mobile-side .maya-product-card__media {
+      min-height: 100%;
+      aspect-ratio: auto;
+    }
+
+    .maya-featured--mobile-side .maya-product-card__image-link {
+      position: absolute;
+      inset: 0;
+    }
+
+    .maya-featured--mobile-stacked .maya-product-card__media {
+      aspect-ratio: var(--maya-featured-image-ratio-mobile);
+    }
+
+    .maya-product-card__content {
+      padding: var(--space-2);
+    }
+
+    .maya-product-card__category {
+      min-height: 1.8rem;
+      font-size: 0.875rem;
+    }
+
+    .maya-product-card__title {
+      margin-top: var(--space-1);
+      font-size: clamp(1.375rem, 5.8vw, 1.625rem);
+    }
+
+    .maya-product-card__description {
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .maya-product-card__footer {
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      padding-top: var(--space-2);
+    }
+
+    .maya-product-card__price {
+      font-size: 1.375rem;
+    }
+
+    .maya-product-card__action,
+    .maya-product-card__sold-out {
+      min-height: 2.75rem;
+      font-size: 0.875rem;
+    }
+
+    .maya-featured__bottom-divider {
+      width: min(100%, 24rem);
+    }
+  }
+
+  @media (max-width: 374px) {
+    .maya-featured--mobile-side .maya-product-card {
+      display: flex;
+    }
+
+    .maya-featured--mobile-side .maya-product-card__media {
+      min-height: 0;
+      aspect-ratio: var(--maya-featured-image-ratio-mobile);
+    }
+
+    .maya-featured--mobile-side .maya-product-card__image-link {
+      position: static;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .maya-product-card,
+    .maya-product-card__image {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.maya_featured_bestsellers.name",
+  "enabled_on": {
+    "templates": ["index"]
+  },
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "t:sections.maya_featured_bestsellers.show_section",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "t:sections.maya_featured_bestsellers.eyebrow",
+      "default": "Customer Favorites"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.maya_featured_bestsellers.heading",
+      "default": "Featured Bestsellers"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "t:sections.maya_featured_bestsellers.description",
+      "default": "A few of the drinks, desserts, and cafe favorites our customers keep coming back for."
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.menu_button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_menu_button",
+      "label": "t:sections.maya_featured_bestsellers.show_menu_button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "menu_label",
+      "label": "t:sections.maya_featured_bestsellers.menu_label",
+      "default": "View Full Menu"
+    },
+    {
+      "type": "url",
+      "id": "menu_url",
+      "label": "t:sections.maya_featured_bestsellers.menu_url"
+    },
+    {
+      "type": "checkbox",
+      "id": "menu_new_tab",
+      "label": "t:sections.maya_featured_bestsellers.menu_new_tab",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.products"
+    },
+    {
+      "type": "select",
+      "id": "product_source",
+      "label": "t:sections.maya_featured_bestsellers.product_source",
+      "options": [
+        { "value": "collection", "label": "t:sections.maya_featured_bestsellers.source_collection" },
+        { "value": "manual", "label": "t:sections.maya_featured_bestsellers.source_manual" }
+      ],
+      "default": "collection"
+    },
+    {
+      "type": "collection",
+      "id": "product_collection",
+      "label": "t:sections.maya_featured_bestsellers.product_collection"
+    },
+    {
+      "type": "range",
+      "id": "product_limit",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "label": "t:sections.maya_featured_bestsellers.product_limit",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.product_cards"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_description",
+      "label": "t:sections.maya_featured_bestsellers.show_product_description",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "description_words",
+      "min": 8,
+      "max": 40,
+      "step": 1,
+      "label": "t:sections.maya_featured_bestsellers.description_words",
+      "default": 18
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_category",
+      "label": "t:sections.maya_featured_bestsellers.show_product_category",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_badge",
+      "label": "t:sections.maya_featured_bestsellers.show_product_badge",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_price",
+      "label": "t:sections.maya_featured_bestsellers.show_product_price",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_action",
+      "label": "t:sections.maya_featured_bestsellers.show_product_action",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "product_action_label",
+      "label": "t:sections.maya_featured_bestsellers.product_action_label",
+      "default": "Order Now"
+    },
+    {
+      "type": "select",
+      "id": "product_action_mode",
+      "label": "t:sections.maya_featured_bestsellers.product_action_mode",
+      "options": [
+        { "value": "view_product", "label": "t:sections.maya_featured_bestsellers.action_view_product" },
+        { "value": "quick_add", "label": "t:sections.maya_featured_bestsellers.action_quick_add" }
+      ],
+      "default": "view_product"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_second_image",
+      "label": "t:sections.maya_featured_bestsellers.show_second_image",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_product_image_hover",
+      "label": "t:sections.maya_featured_bestsellers.enable_product_image_hover",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "desktop_image_ratio",
+      "label": "t:sections.maya_featured_bestsellers.desktop_image_ratio",
+      "options": [
+        { "value": "4 / 3", "label": "t:sections.maya_featured_bestsellers.ratio_landscape" },
+        { "value": "1 / 1", "label": "t:sections.maya_featured_bestsellers.ratio_square" },
+        { "value": "3 / 4", "label": "t:sections.maya_featured_bestsellers.ratio_portrait" }
+      ],
+      "default": "4 / 3"
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_ratio",
+      "label": "t:sections.maya_featured_bestsellers.mobile_image_ratio",
+      "options": [
+        { "value": "4 / 3", "label": "t:sections.maya_featured_bestsellers.ratio_landscape" },
+        { "value": "1 / 1", "label": "t:sections.maya_featured_bestsellers.ratio_square" },
+        { "value": "3 / 4", "label": "t:sections.maya_featured_bestsellers.ratio_portrait" }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "image_crop_position",
+      "label": "t:sections.maya_featured_bestsellers.image_crop_position",
+      "options": [
+        { "value": "left top", "label": "t:sections.maya_featured_bestsellers.left_top" },
+        { "value": "center top", "label": "t:sections.maya_featured_bestsellers.center_top" },
+        { "value": "right top", "label": "t:sections.maya_featured_bestsellers.right_top" },
+        { "value": "left center", "label": "t:sections.maya_featured_bestsellers.left_center" },
+        { "value": "center center", "label": "t:sections.maya_featured_bestsellers.center_center" },
+        { "value": "right center", "label": "t:sections.maya_featured_bestsellers.right_center" },
+        { "value": "left bottom", "label": "t:sections.maya_featured_bestsellers.left_bottom" },
+        { "value": "center bottom", "label": "t:sections.maya_featured_bestsellers.center_bottom" },
+        { "value": "right bottom", "label": "t:sections.maya_featured_bestsellers.right_bottom" }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.layout"
+    },
+    {
+      "type": "select",
+      "id": "desktop_columns",
+      "label": "t:sections.maya_featured_bestsellers.desktop_columns",
+      "options": [
+        { "value": "4", "label": "4" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "tablet_columns",
+      "label": "t:sections.maya_featured_bestsellers.tablet_columns",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "section_top_spacing",
+      "min": 32,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "label": "t:sections.maya_featured_bestsellers.section_top_spacing",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "section_bottom_spacing",
+      "min": 32,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "label": "t:sections.maya_featured_bestsellers.section_bottom_spacing",
+      "default": 80
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_curved_top",
+      "label": "t:sections.maya_featured_bestsellers.enable_curved_top",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.mobile"
+    },
+    {
+      "type": "select",
+      "id": "mobile_card_layout",
+      "label": "t:sections.maya_featured_bestsellers.mobile_card_layout",
+      "options": [
+        { "value": "side", "label": "t:sections.maya_featured_bestsellers.mobile_side" },
+        { "value": "stacked", "label": "t:sections.maya_featured_bestsellers.mobile_stacked" }
+      ],
+      "default": "side"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.decorations"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading_divider",
+      "label": "t:sections.maya_featured_bestsellers.show_heading_divider",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_divider_icon",
+      "label": "t:sections.maya_featured_bestsellers.heading_divider_icon",
+      "options": [
+        { "value": "heart", "label": "t:sections.maya_featured_bestsellers.icon_heart" },
+        { "value": "coffee", "label": "t:sections.maya_featured_bestsellers.icon_coffee" }
+      ],
+      "default": "heart"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_divider",
+      "label": "t:sections.maya_featured_bestsellers.show_bottom_divider",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "bottom_divider_icon",
+      "label": "t:sections.maya_featured_bestsellers.bottom_divider_icon",
+      "options": [
+        { "value": "divider-coffee", "label": "t:sections.maya_featured_bestsellers.icon_coffee" },
+        { "value": "heart", "label": "t:sections.maya_featured_bestsellers.icon_heart" }
+      ],
+      "default": "divider-coffee"
+    },
+    {
+      "type": "range",
+      "id": "divider_width",
+      "min": 160,
+      "max": 720,
+      "step": 20,
+      "unit": "px",
+      "label": "t:sections.maya_featured_bestsellers.divider_width",
+      "default": 440
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "t:sections.maya_featured_bestsellers.divider_color",
+      "default": "#C5A265"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.maya_featured_bestsellers.colors"
+    },
+    {
+      "type": "color",
+      "id": "section_background",
+      "label": "t:sections.maya_featured_bestsellers.section_background",
+      "default": "#F7F1E8"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "t:sections.maya_featured_bestsellers.card_background",
+      "default": "#FFFDF8"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "t:sections.maya_featured_bestsellers.card_border_color",
+      "default": "#E5DDD3"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "t:sections.maya_featured_bestsellers.accent_color",
+      "default": "#C5A265"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "t:sections.maya_featured_bestsellers.heading_color",
+      "default": "#28221E"
+    },
+    {
+      "type": "color",
+      "id": "body_text_color",
+      "label": "t:sections.maya_featured_bestsellers.body_text_color",
+      "default": "#6E655E"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "t:sections.maya_featured_bestsellers.product_block",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "t:sections.maya_featured_bestsellers.block_product"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "t:sections.maya_featured_bestsellers.custom_image"
+        },
+        {
+          "type": "text",
+          "id": "title_override",
+          "label": "t:sections.maya_featured_bestsellers.title_override"
+        },
+        {
+          "type": "textarea",
+          "id": "description_override",
+          "label": "t:sections.maya_featured_bestsellers.description_override"
+        },
+        {
+          "type": "text",
+          "id": "category_label",
+          "label": "t:sections.maya_featured_bestsellers.category_label"
+        },
+        {
+          "type": "select",
+          "id": "category_icon",
+          "label": "t:sections.maya_featured_bestsellers.category_icon",
+          "options": [
+            { "value": "auto", "label": "t:sections.maya_featured_bestsellers.icon_auto" },
+            { "value": "coffee", "label": "t:sections.maya_featured_bestsellers.icon_coffee" },
+            { "value": "drink", "label": "t:sections.maya_featured_bestsellers.icon_drink" },
+            { "value": "dessert", "label": "t:sections.maya_featured_bestsellers.icon_dessert" },
+            { "value": "leaf", "label": "t:sections.maya_featured_bestsellers.icon_leaf" },
+            { "value": "meal", "label": "t:sections.maya_featured_bestsellers.icon_meal" },
+            { "value": "star", "label": "t:sections.maya_featured_bestsellers.icon_star" },
+            { "value": "heart", "label": "t:sections.maya_featured_bestsellers.icon_heart" },
+            { "value": "none", "label": "t:sections.maya_featured_bestsellers.icon_none" }
+          ],
+          "default": "auto"
+        },
+        {
+          "type": "text",
+          "id": "badge_label",
+          "label": "t:sections.maya_featured_bestsellers.badge_label"
+        },
+        {
+          "type": "select",
+          "id": "badge_icon",
+          "label": "t:sections.maya_featured_bestsellers.badge_icon",
+          "options": [
+            { "value": "star", "label": "t:sections.maya_featured_bestsellers.icon_star" },
+            { "value": "heart", "label": "t:sections.maya_featured_bestsellers.icon_heart" },
+            { "value": "coffee", "label": "t:sections.maya_featured_bestsellers.icon_coffee" },
+            { "value": "none", "label": "t:sections.maya_featured_bestsellers.icon_none" }
+          ],
+          "default": "star"
+        },
+        {
+          "type": "url",
+          "id": "custom_url",
+          "label": "t:sections.maya_featured_bestsellers.custom_url"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_mobile",
+          "label": "t:sections.maya_featured_bestsellers.hide_mobile",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_desktop",
+          "label": "t:sections.maya_featured_bestsellers.hide_desktop",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.maya_featured_bestsellers.name"
+    }
+  ]
+}
+{% endschema %}

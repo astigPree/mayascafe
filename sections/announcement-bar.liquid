@@ -15,7 +15,11 @@
   >
     <div class="maya-announcement__inner page-width">
       <div class="maya-announcement__message">
-        {% render 'maya-icon', name: section.settings.icon %}
+        {% if section.settings.icon == 'coffee' %}
+          {% render 'maya-icon', name: 'announcement' %}
+        {% else %}
+          {% render 'maya-icon', name: section.settings.icon %}
+        {% endif %}
         <p>
           <span class="maya-announcement__desktop-text">{{ desktop_message | escape }}</span>
           <span class="maya-announcement__mobile-text">{{ mobile_message | escape }}</span>
@@ -90,8 +94,8 @@
   .maya-announcement__message,
   .maya-announcement__social {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    align-items: center; 
+    /* gap: 0.75rem; */
   }
 
   .maya-announcement__message {
@@ -107,15 +111,19 @@
   }
 
   .maya-announcement__message .maya-icon {
+    display: inline-flex;
     flex: 0 0 auto;
-    width: 1.5rem;
+    /* width: 1.25rem;
+    height: 1.25rem; */
+    width: auto;
+    height: 2rem;
     color: var(--maya-announcement-accent);
   }
 
   .maya-announcement__message .maya-icon svg,
   .maya-announcement__social .maya-icon svg {
     width: 100%;
-    height: auto;
+    height: 100%;
   }
 
   .maya-announcement__separator {
@@ -142,7 +150,8 @@
   }
 
   .maya-announcement__social .maya-icon {
-    width: 1.25rem;
+    /* width: 1.25rem; */
+    width: 80%;
   }
 
   @media (max-width: 749px) {

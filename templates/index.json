@@ -51,6 +51,10 @@
       ],
       "settings": {}
     },
+    "maya_featured_bestsellers": {
+      "type": "maya-featured-bestsellers",
+      "settings": {}
+    },
     "main": {
       "type": "hello-world",
       "settings": {}
@@ -58,6 +62,7 @@
   },
   "order": [
     "maya_hero",
+    "maya_featured_bestsellers",
     "main"
   ]
 }

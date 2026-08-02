@@ -56,6 +56,17 @@
   "hero": {
     "reviews": "reviews"
   },
+  "featured_bestsellers": {
+    "from": "From",
+    "sold_out": "Sold Out",
+    "view_product": "View {{ product }}",
+    "default_heading": "Featured Bestsellers",
+    "cafe_favorite": "Cafe Favorite",
+    "placeholder_product": "Featured product",
+    "placeholder_category": "Product category",
+    "placeholder_description": "Select a Shopify product to preview this card.",
+    "empty_editor": "Select a collection with products or add featured product blocks."
+  },
   "password": {
     "title": "This shop is private",
     "password": "Password",

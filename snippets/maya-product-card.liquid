@@ -1,0 +1,211 @@
+{% doc %}
+  Renders a configurable Maya's Cafe featured product card using Shopify product data.
+
+  @param {product} product - Shopify product to display.
+  @param {image} [custom_image] - Optional image override for a manual product block.
+  @param {string} [title_override] - Optional product title override.
+  @param {string} [description_override] - Optional short product description override.
+  @param {string} [category_label] - Optional product category label override.
+  @param {string} [category_icon] - Icon name, `auto`, or `none`.
+  @param {string} [badge_label] - Optional badge label override.
+  @param {string} [badge_icon] - Badge icon name or `none`.
+  @param {string} [custom_url] - Optional product destination override.
+  @param {string} action_label - Label for the product action.
+  @param {boolean} show_description - Whether to show the product description.
+  @param {boolean} show_category - Whether to show the product category pill.
+  @param {boolean} show_badge - Whether to show the product badge.
+  @param {boolean} show_price - Whether to show Shopify pricing.
+  @param {boolean} show_action - Whether to show the product action.
+  @param {boolean} show_second_image - Whether to reveal a second product image on hover when available.
+  @param {number} description_words - Maximum description words.
+  @param {string} [visibility_class] - Optional responsive visibility classes.
+  @param {string} [block_attributes] - Shopify Theme Editor attributes for a manual product block.
+
+  @example
+  {% render 'maya-product-card',
+    product: product,
+    action_label: section.settings.product_action_label,
+    show_description: section.settings.show_product_description,
+    show_category: section.settings.show_product_category,
+    show_badge: section.settings.show_product_badge,
+    show_price: section.settings.show_product_price,
+    show_action: section.settings.show_product_action,
+    show_second_image: section.settings.show_second_image,
+    description_words: section.settings.description_words
+  %}
+{% enddoc %}
+
+{% liquid
+  assign product_url = custom_url | default: product.url
+  assign card_image = custom_image | default: product.featured_image
+  assign card_title = title_override | default: product.title
+
+  if card_title == blank
+    assign card_title = 'featured_bestsellers.placeholder_product' | t
+  endif
+
+  assign card_description = description_override
+  if card_description == blank
+    if product.metafields.custom.card_description != blank
+      assign card_description = product.metafields.custom.card_description.value | default: product.metafields.custom.card_description
+    endif
+  endif
+  if card_description == blank
+    assign card_description = product.description | strip_html
+  endif
+  if card_description != blank
+    assign card_description = card_description | strip_html | truncatewords: description_words
+  endif
+
+  assign resolved_category_label = category_label
+  if resolved_category_label == blank
+    if product.metafields.custom.card_category != blank
+      assign resolved_category_label = product.metafields.custom.card_category.value | default: product.metafields.custom.card_category
+    endif
+  endif
+  if resolved_category_label == blank
+    assign resolved_category_label = product.type
+  endif
+  if resolved_category_label == blank
+    assign resolved_category_label = 'featured_bestsellers.cafe_favorite' | t
+  endif
+
+  assign resolved_category_icon = category_icon | default: 'auto'
+  if resolved_category_icon == 'auto'
+    if product.metafields.custom.card_icon != blank
+      assign resolved_category_icon = product.metafields.custom.card_icon.value | default: product.metafields.custom.card_icon
+    endif
+  endif
+  if resolved_category_icon == 'auto'
+    assign tagged_category_icon = blank
+    for tag in product.tags
+      assign tag_handle = tag | handleize
+      if tag_handle contains 'icon-'
+        assign tagged_category_icon = tag_handle | remove_first: 'icon-'
+        break
+      endif
+    endfor
+    if tagged_category_icon != blank
+      assign resolved_category_icon = tagged_category_icon
+    endif
+  endif
+  if resolved_category_icon == 'auto'
+    assign product_type_handle = product.type | handleize
+    case product_type_handle
+      when 'coffee', 'drink', 'drinks', 'beverage', 'beverages', 'latte', 'frappe'
+        assign resolved_category_icon = 'drink'
+      when 'dessert', 'desserts', 'cupcake', 'cupcakes', 'cake', 'cakes'
+        assign resolved_category_icon = 'dessert'
+      when 'salad', 'meal', 'meals', 'food', 'foods'
+        assign resolved_category_icon = 'leaf'
+      else
+        assign resolved_category_icon = 'coffee'
+    endcase
+  endif
+
+  assign resolved_badge_label = badge_label
+  if resolved_badge_label == blank
+    if product.metafields.custom.badge_label != blank
+      assign resolved_badge_label = product.metafields.custom.badge_label.value | default: product.metafields.custom.badge_label
+    endif
+  endif
+  if resolved_badge_label == blank
+    for tag in product.tags
+      assign tag_handle = tag | handleize
+      if tag_handle contains 'badge-'
+        if tag contains ':'
+          assign resolved_badge_label = tag | split: ':' | last | strip
+        else
+          assign resolved_badge_label = tag_handle | remove_first: 'badge-' | replace: '-', ' ' | capitalize
+        endif
+        break
+      endif
+    endfor
+  endif
+
+  assign resolved_badge_icon = badge_icon | default: 'star'
+  assign second_image = blank
+  if show_second_image
+    if custom_image == blank
+      assign second_image = product.images[1]
+    endif
+  endif
+
+  assign image_alt = card_image.alt | default: card_title
+  assign is_on_sale = false
+  if product.compare_at_price_max > product.price
+    assign is_on_sale = true
+  endif
+%}
+
+<li class="maya-product-card{% if visibility_class != blank %} {{ visibility_class }}{% endif %}"{% if block_attributes != blank %} {{ block_attributes }}{% endif %}>
+  <div class="maya-product-card__media">
+    <a class="maya-product-card__image-link" href="{{ product_url }}" aria-label="{{ 'featured_bestsellers.view_product' | t: product: card_title | escape }}">
+      {% if card_image != blank %}
+        {{ card_image | image_url: width: 800 | image_tag: widths: '240, 360, 480, 640, 800', sizes: '(min-width: 1301px) 23vw, (min-width: 750px) 45vw, 46vw', loading: 'lazy', alt: image_alt, class: 'maya-product-card__image maya-product-card__image--primary' }}
+      {% else %}
+        {{ 'product-1' | placeholder_svg_tag: 'maya-product-card__image maya-product-card__image--placeholder' }}
+      {% endif %}
+      {% if second_image != blank %}
+        {{ second_image | image_url: width: 800 | image_tag: widths: '240, 360, 480, 640, 800', sizes: '(min-width: 1301px) 23vw, (min-width: 750px) 45vw, 46vw', loading: 'lazy', alt: '', class: 'maya-product-card__image maya-product-card__image--secondary' }}
+      {% endif %}
+    </a>
+
+    {% if show_badge and resolved_badge_label != blank %}
+      <span class="maya-product-card__badge">
+        {% unless resolved_badge_icon == 'none' %}
+          {% render 'maya-icon', name: resolved_badge_icon %}
+        {% endunless %}
+        <span>{{ resolved_badge_label | escape }}</span>
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="maya-product-card__content">
+    {% if show_category and resolved_category_label != blank %}
+      <p class="maya-product-card__category">
+        {% unless resolved_category_icon == 'none' %}
+          {% render 'maya-icon', name: resolved_category_icon %}
+        {% endunless %}
+        <span>{{ resolved_category_label | escape }}</span>
+      </p>
+    {% endif %}
+
+    <h3 class="maya-product-card__title">
+      <a href="{{ product_url }}">{{ card_title | escape }}</a>
+    </h3>
+
+    {% if show_description and card_description != blank %}
+      <p class="maya-product-card__description">{{ card_description | escape }}</p>
+    {% endif %}
+
+    {% if show_price or show_action %}
+      <div class="maya-product-card__footer">
+        {% if show_price %}
+          <p class="maya-product-card__price">
+            {% if is_on_sale %}
+              <s>{{ product.compare_at_price_max | money }}</s>
+            {% endif %}
+            {% if product.price_varies %}
+              <span class="maya-product-card__price-from">{{ 'featured_bestsellers.from' | t }}</span>
+              {{ product.price_min | money }}
+            {% else %}
+              {{ product.price | money }}
+            {% endif %}
+          </p>
+        {% endif %}
+
+        {% if show_action %}
+          {% if product.available %}
+            <a class="button button--outline maya-product-card__action" href="{{ product_url }}" aria-label="{{ action_label | append: ': ' | append: card_title | escape }}">
+              <span>{{ action_label | escape }}</span>
+              {% render 'maya-icon', name: 'arrow-circle' %}
+            </a>
+          {% else %}
+            <span class="maya-product-card__sold-out" aria-disabled="true">{{ 'featured_bestsellers.sold_out' | t }}</span>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</li>

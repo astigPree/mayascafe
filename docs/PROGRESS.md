@@ -52,4 +52,25 @@
 - Made the navigation drawer viewport-height and scrollable, with touch-friendly inner-panel overflow for long menus and contact content.
 - Reduced navigation label sizing on phone widths to 1.5–1.875rem while leaving tablet and desktop navigation typography unchanged.
 - `shopify theme check --no-color` passes with 42 files inspected and no offenses.
+
+## Featured Bestsellers completed
+
+- Added the configurable Maya's Bestsellers homepage section directly after the Hero without removing the existing homepage content.
+- Added a reusable Shopify-product card snippet with collection and manual-block source modes, Shopify price and sale handling, product availability states, image and content fallbacks, optional category and badge metadata/tag support, and safe product-page actions.
+- Reused the existing SVG asset library through the shared icon snippet for the eyebrow, category, badge, action, and decorative divider treatments; no new SVG assets were required.
+- Built responsive layouts: configurable 3–4 column desktop grid, configurable 2–3 column tablet grid, and image-left mobile product cards that stack below 375px for readability.
+- Added Theme Editor settings for source selection, product cards, images, layout, colors, decorations, and mobile behavior; added up to eight manually ordered product blocks with Shopify-product and content overrides.
+- Added storefront and schema translations for the section, plus Theme Editor placeholder and empty states that are hidden from the live storefront when no products are configured.
+- Validation completed: section schema JSON, translation references, range limits, homepage integration, and `shopify theme check --no-color` (44 files, no offenses after the final validation run).
+- No Shopify theme development server was started. About, Gallery, Reviews, Visit, and Footer sections remain untouched.
 - No Shopify theme development server was started.
+
+## Announcement bar icon refinement
+
+- Replaced the default announcement coffee glyph with a dedicated compact steaming-cup SVG, styled with `currentColor` so it consistently uses the configurable muted-gold announcement accent.
+- Kept the Theme Editor's Clock and Heart icon options unchanged; the Coffee Cup selection now uses the refined announcement-specific icon.
+- Reduced the announcement icon to a compact 20px square and set explicit SVG dimensions for a cleaner result beside the status text.
+
+## Featured Bestsellers hover contrast refinement
+
+- Changed the View Full Menu and product Order Now hover state to espresso with inverse text and icons, preventing the global outline-button surface hover from making labels unreadable.
