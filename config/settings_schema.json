@@ -398,13 +398,13 @@
         "type": "text",
         "id": "cafe_address",
         "label": "t:labels.cafe_address",
-        "default": "Ibingay Street, Brgy. Ibingay"
+        "default": "Ibingay Street"
       },
       {
         "type": "text",
         "id": "cafe_city",
         "label": "t:labels.cafe_city",
-        "default": "Masbate City"
+        "default": "Brgy. Ibingay Masbate City"
       },
       {
         "type": "text",
@@ -431,19 +431,19 @@
         "type": "text",
         "id": "cafe_opening_status_text",
         "label": "t:labels.cafe_opening_status_text",
-        "default": "Hours to be confirmed"
+        "default": "Open Today"
       },
       {
         "type": "text",
         "id": "cafe_hours_summary",
         "label": "t:labels.cafe_hours_summary",
-        "default": "Add confirmed opening hours"
+        "default": "8:00 AM - 10:00 PM"
       },
       {
         "type": "textarea",
         "id": "cafe_weekly_hours",
         "label": "t:labels.cafe_weekly_hours",
-        "default": "Add confirmed opening hours"
+        "default": "8:00 AM - 10:00 PM"
       },
       {
         "type": "checkbox",

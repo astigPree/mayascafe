@@ -45,5 +45,11 @@
 - Fixed the hero divider by separating its line elements from the heart icon wrapper, preventing the icon from stretching across the divider.
 - Increased hero button icons to 2rem (32px) and set the Get Directions hover text to espresso for readable contrast on the light hover background.
 - Set the primary View Our Menu button label to inverse white, matching its white icon in normal and hover states.
+- Refined the hero information row to use the full desktop width, explicitly size each SVG icon to 2.75rem, and use compact centered two-column cards on mobile.
+- Fixed the rating block's generated review label spacing so it renders as “35 reviews” instead of “35reviews”.
+- Fixed mobile/tablet drawer navigation: the divider heart no longer stretches, drawer logo assets are tinted gold for the dark background, inactive navigation icons remain readable, and Catalog/Contact links now receive their intended icons.
+- Changed header responsiveness so the navigation drawer opens only at phone widths (up to 749px); tablet widths retain the desktop navigation with compact spacing, and the phone drawer now occupies the full viewport width.
+- Made the navigation drawer viewport-height and scrollable, with touch-friendly inner-panel overflow for long menus and contact content.
+- Reduced navigation label sizing on phone widths to 1.5–1.875rem while leaving tablet and desktop navigation typography unchanged.
 - `shopify theme check --no-color` passes with 42 files inspected and no offenses.
 - No Shopify theme development server was started.
